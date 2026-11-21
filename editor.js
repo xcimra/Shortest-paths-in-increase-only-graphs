@@ -1,4 +1,4 @@
-import { codeview, updateCytoscapeEdgesCode,graph,checkinput } from "./main.js";
+import { codeview, updateCytoscapeEdgesCode,graph } from "./main.js";
 // editor.js
 export function checkinput1(input) {
   if (graph == null) {

@@ -519,15 +519,7 @@ export function modifyPlaybackStepLabel(labels, stepNumber, newLabel) {
   //drawSquareLabelsFromPlayback(labels, index);
   return labels;
 }
-export function modifyColorBoxLabel(labels, stepNumber, newLabel) {
-  if (!Array.isArray(labels)) return [];
 
-  const index = Number(stepNumber);
-  if (!Number.isInteger(index) || index < 0) return labels;
-
-  colorlabels.push([stepNumber, newLabel]);
-  return labels;
-}
 export function buildPlaybackStepLabel({ phase, index, isActive = false }) {
   const phaseKey = phase?.key ?? "cleanup";
   const phaseNumber = phaseKey.startsWith("fixup-") ? Number(phaseKey.split("-")[1]) : null;
@@ -960,11 +952,7 @@ function resetLocallyShortestQueues(){
     }
   }
 }
-// Pomocná funkcia na formátovanie susedov (rovnaká ako predtým)
-function formatNeighborPath(pathNode) {
-  if (!pathNode) return "None";
-  return `Path(${pathNode.start + 1} → ${pathNode.end + 1}) [w: ${pathNode.weight}]`;
-}
+
 const tooltip = document.getElementById('path-tooltip');
 
 async function showName() {
@@ -1734,8 +1722,6 @@ export function updateCytoscapeEdgesCode(
     }
   }
 
-  const getColor = (key) =>
-    colorMap instanceof Map ? colorMap.get(key) : null;
 
   const getPathColor = path => {
     const key = pathSignature(path);
