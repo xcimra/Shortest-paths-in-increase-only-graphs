@@ -1,20 +1,5 @@
-import { codeview, updateCytoscapeEdgesCode,graph } from "./main.js";
-// editor.js
-export function checkinput1(input) {
-  if (graph == null) {
-    alert("zadajte najprv počet vrcholov");
-    return false;
-  }
+import {  updateCytoscapeEdgesCode,graph } from "./main.js";
 
-  const inp = Number(input);
-
-  if (!Number.isInteger(inp) || inp <= 0) {
-    alert("Zadajte kladné celé číslo väčšie ako 0");
-    return false;
-  }
-
-  return true;
-}
 const codeLines = [
 
 ];
@@ -23,11 +8,7 @@ export const history = []
 // internal state
 
 export let currentLine = 0;
-export function resetcurrentline()
-{
-  currentLine = 0;
-  moveCursor();
-}
+
 // DOM refs (set during init)
 let codeDiv = null;
 let linesDiv = null;
@@ -98,93 +79,6 @@ export function moveCursor() {
   const offsetTop = 10;
 
   cursor.style.top = (currentLine * lineHeight + offsetTop) + "px";
-}
-
-/**
- * Advance execution by one step
- */
-export function nextStep() {
-  if (graph ===null)
-  {
-    alert("zadajte počet vrcholov grafu");
-    return;
-  }
-  if (codeview === false )
-  {
-    alert("stlačte najprv Mód pozerania kódu");
-    return;
-  }
-  if (currentLine < codeLines.length - 1) {
-    currentLine++;
-    const cur = counthistory.indexOf(currentLine);
-    if (cur !== -1)
-    {
-      console.log("yes");
-      console.log(history[cur][0]);
-      console.log(history[cur][1]);
-      updateCytoscapeEdgesCode(history[cur][1], history[cur][2]);
-    }
-
-    moveCursor();
-  }
-}
-export function goToLine() {
-  if (graph ===null)
-  {
-    alert("zadajte počet vrcholov grafu");
-    return;
-  }
-
-  if (codeview === false )
-  {
-    alert("stlačte najprv Mód pozerania kódu");
-    return;
-  }
-  const input = document.getElementById("gotoLineInput");
-
-  const line = parseInt(input.value);
-  if (!checkinput1(line))
-  {
-    return;
-  }
-  if (isNaN(line)) return;
-  console.log(line,codeLines.length);
-  if (line-1<codeLines.length)
-  {
-
-    currentLine = line-1;
-  }
-  moveCursor();
-  if (currentLine < codeLines.length  && line -1<codeLines.length ) {
-
-    const cur = counthistory.indexOf(currentLine);
-    console.log(counthistory.indexOf(currentLine));
-    if (cur !== -1)
-    {
-      console.log("yes");
-      console.log(history[cur][0]);
-      console.log(history[cur][1]);
-      updateCytoscapeEdgesCode(history[cur][1], history[cur][2]);
-    }
-
-
-  }
-}
-export function beforeStep() {
-  if (graph ===null)
-  {
-    alert("zadajte počet vrcholov grafu");
-    return;
-  }
-  if (codeview === false )
-  {
-    alert("stlačte najprv Mód pozerania kódu");
-    return;
-  }
-  if (currentLine >0) {
-    currentLine--;
-    moveCursor();
-  }
 }
 
 /**

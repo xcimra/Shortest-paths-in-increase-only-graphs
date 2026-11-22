@@ -1,5 +1,5 @@
 import { Graph } from "./graph.js";
-import { initEditor, nextStep,addCodeLine,beforeStep,history,counter,goToLine,resetcurrentline,resetEditor } from "./editor.js";
+import { initEditor, addCodeLine,history,counter,resetEditor } from "./editor.js";
 import { formatWeight, parsePath, parseWeightValue, applyWeightUpdates } from "./utils.js";
 export let graph = null;
 export const labels = [];
@@ -11,7 +11,6 @@ let node1;
 let numVertices = null;
 let queueMode;
 let edge_matrix = null;
-export let codeview = false;
 export function checkinput(input) {
   if (graph == null) {
     alert("zadajte najprv počet vrcholov");
@@ -27,25 +26,7 @@ export function checkinput(input) {
 
   return true;
 }
-export function codeView(){
-  if (graph == null) {
-    alert("zadajte najprv počet vrcholov");
-    return false;
-  }
-  const btn = document.getElementById("codemode");
-  codeview =!codeview;
-  cy.edges().remove();
-  if (codeview)
-  {
-    btn.textContent = "preč s módu pozerania kodu";
-    return;
-  }
-  updateCytoscapeEdges(graph);
-  resetcurrentline();
-  btn.textContent = "mód pozerania kodu";
 
-  //updateCytoscapeEdges(graph);
-};
 
 function promptManualEdges() {
   console.log("promptManualEdges called")
@@ -500,10 +481,7 @@ window.addEventListener("DOMContentLoaded", () => {
   initSquarePanel();
 
   // 🔥 expose to HTML
-  window.nextStep = nextStep;
-  window.codeView =codeView;
-  window.beforeStep = beforeStep;
-  window.goToLine = goToLine;
+
   window.changeSquareAppearance = changeSquareAppearance;
   window.assignPlaybackStepSquareLabel = assignPlaybackStepSquareLabel;
   window.modifyPlaybackStepLabel = modifyPlaybackStepLabel;
@@ -993,7 +971,7 @@ async function showName() {
   colorlabels.length = 0;
   squareLabelSnapshots.length = 0;
   Object.values(squarePhaseStates).forEach(phaseStates => phaseStates.splice(0));
-  codeview = false;
+
   const codeModeButton = document.getElementById("codemode");
   if (codeModeButton) codeModeButton.textContent = "mód pozerania kódu";
   const startInput = document.getElementById("start");
@@ -1374,11 +1352,7 @@ function selectUpdateMode(mode) {
 }
 
 function doupdate(v, win, wout) {
-  if (codeview)
-  {
-    alert("pozeranie kodu zapnute");
-    return false;
-  }
+
   if (!checkinput(v))
   {
     return false;
