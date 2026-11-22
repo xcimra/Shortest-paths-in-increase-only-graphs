@@ -1,6 +1,5 @@
 import { MinPriorityQueue } from "https://cdn.skypack.dev/@datastructures-js/priority-queue";
 import { RBTree } from "https://cdn.jsdelivr.net/npm/bintrees@1.0.2/+esm";
-
 import { saveGraphState, modifyPlaybackStepLabel, labels,assignPlaybackStepSquareLabel } from "./main.js";
 export class Path {
   static gen_id = 0;
@@ -817,12 +816,9 @@ clone() {
       
     }
     
-    
-    console.log("cleanup done");
-    console.log(this.p_list);
-    console.log(this.p_star_list);
 
   }
+
 
   fixup(v, w) {
     console.log("fixup", v, w);
@@ -848,6 +844,14 @@ clone() {
         label
       );
     };
+
+    this.fixupPhase1(v, w, pathSignature, saveFixupStep);
+    const H = this.fixupPhase2(saveFixupStep, pathSignature);
+    this.fixupPhase3(H, saveFixupStep, pathSignature);
+  }
+
+  // ---------- phase 1 ----------
+  fixupPhase1(v, w, pathSignature, saveFixupStep) {
     const from =w[0].filter((a)=> a!== Infinity );
     const to =w[1].filter((a)=> a!== Infinity );
 
@@ -1088,9 +1092,12 @@ clone() {
     }
     
     saveFixupStep(0, `pridávam všetky aktualizované hrany`, fixupOnePaths, fixupOneColors);
+  }
 
-    // ---------- phase 2 ----------
-   let pathColors = new Map();
+  // ---------- phase 2 ----------
+  fixupPhase2(saveFixupStep, pathSignature) {
+    let addedPaths = [];
+    let pathColors = new Map();
 
     const H = new MinPriorityQueue({
       compare: (a, b) => a.weight - b.weight,
@@ -1126,11 +1133,16 @@ clone() {
     }
     
     //saveFixupStep(1, `pridávam cesty do prioritného radu H`, hPaths, pathColors);
-    // ---------- phase 3 ----------
+
+    return H;
+  }
+
+  // ---------- phase 3 ----------
+  fixupPhase3(H, saveFixupStep, pathSignature) {
 
     const n = this.p_list.length;
-    addedPaths = [];
-    pathColors = new Map();
+    let addedPaths = [];
+    let pathColors = new Map();
     const discoveredFixup3Colors = new Map();
     const visited = Array.from({ length: n }, () => Array(n).fill(false));
 
@@ -1465,10 +1477,8 @@ clone() {
       pathColors.delete(pathSignature(path_xy));
       
     }
-
-    
-
   }
+
 
   update(v, w) {
     const graphBeforeCleanup = this.clone();
