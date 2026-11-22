@@ -1,5 +1,4 @@
 import { Graph } from "./graph.js";
-import { initEditor, history,counter } from "./editor.js";
 import { formatWeight, parsePath, parseWeightValue, applyWeightUpdates } from "./utils.js";
 export let graph = null;
 export const labels = [];
@@ -477,7 +476,7 @@ function initSquarePanel() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  initEditor();
+
   initSquarePanel();
 
   // 🔥 expose to HTML

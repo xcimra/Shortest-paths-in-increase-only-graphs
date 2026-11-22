@@ -1,6 +1,6 @@
 import { MinPriorityQueue } from "https://cdn.skypack.dev/@datastructures-js/priority-queue";
 import { RBTree } from "https://cdn.jsdelivr.net/npm/bintrees@1.0.2/+esm";
-import { addhistory,  } from "./editor.js";
+
 import { saveGraphState, modifyPlaybackStepLabel, labels,assignPlaybackStepSquareLabel } from "./main.js";
 export class Path {
   static gen_id = 0;
@@ -495,14 +495,11 @@ clone() {
 
     if (this.p_list[x][y].size() == 0) {
         
-        addhistory(this,new Map([[`${x}-${y}`,"red"],[`P${x}-${y}`,"red"]]));
 
     
       return Infinity;
     }
-    addhistory(this,new Map([[`${x}-${y}`,"green"],[`P${x}-${y}`,"green"]]));
 
-    
 
     return this.p_list[x][y].front().weight;
   }
@@ -510,18 +507,15 @@ clone() {
   path(x, y) {
 
     
-    addhistory(this,new Map([[`P${x}-${y}`,"red"]]));
 
     if (this.p_list[x][y].size() == 0){
-        addhistory(this,new Map([[`${x}-${y}`,"red"],[`P${x}-${y}`,"red"]]));
-        
-        
+
         
         return null;
     }
     let result = this.p_list[x][y].front();
     let pathstring = `Cesta (${result.start + 1}`;
-    addhistory(this,new Map([[`${x}-${y}`,"green"],[`P${x+1}-${y+1}`,"green"]]));
+
     pathstring = _parsepath(result, pathstring);
     pathstring+= ")"
 
@@ -650,7 +644,7 @@ clone() {
           // also keep your P marker
           map.set(`P${p_xy.start}-${p_xy.end}`, "red");
 
-          //addhistory(this, map);
+
           this.p_list[p_xy.start][p_xy.end].remove((el) => el === p_xy);
           this.p_star_list_duplicate_check[p_xy.start][p_xy.end].remove({l:p_xy.l,r:p_xy.r})
           initialPathColor.set(pathSignature(p_xy), "red");
@@ -749,7 +743,6 @@ clone() {
             // also keep your P marker
             map.set(`P${p_xy.start}-${p_xy.end}`, "red");
 
-            //addhistory(this, map);
             shortest += `odstráň {${_parsepath(p_xy,p_xy.start+1)}} z P*(${p_xy.start+1},${p_xy.end+1})`;
             this.p_star_list[p_xy.start][p_xy.end].remove((el) => el === p_xy);
             if (p_xy.r)
