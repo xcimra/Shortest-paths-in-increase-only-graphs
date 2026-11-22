@@ -1,5 +1,5 @@
 import { Graph } from "./graph.js";
-import { initEditor, addCodeLine,history,counter,resetEditor } from "./editor.js";
+import { initEditor, history,counter } from "./editor.js";
 import { formatWeight, parsePath, parseWeightValue, applyWeightUpdates } from "./utils.js";
 export let graph = null;
 export const labels = [];
@@ -951,7 +951,7 @@ async function showName() {
   console.log("Creating graph with", numVertices, "vertices and edge matrix:", edge_matrix);
   let nextGraph;
   try{
-      nextGraph = new Graph(numVertices,edge_matrix,addCodeLine);
+      nextGraph = new Graph(numVertices,edge_matrix);
   } catch (error) {
     numVertices = previousNumVertices;
     edge_matrix = previousEdgeMatrix;
@@ -963,7 +963,7 @@ async function showName() {
   }
 
   graph = nextGraph;
-  resetEditor();
+
   updateCardsApp.closePlayback();
   updateCardsApp.updates.splice(0);
   labels.length = 0;

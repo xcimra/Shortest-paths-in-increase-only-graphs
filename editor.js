@@ -30,23 +30,14 @@ export function initEditor() {
 
   render();
 }
-export function addCodeLine(line) {
-  counter++;
-  codeLines.push((" ".repeat(padding))+line);
-  render();
-}
+
 export function addhistory(graph,special) {
   history.push([counter,graph.clone(),special]);
   counthistory.push(counter);
 
 }
 
-export function addpadding() {
-    padding +=4
-}
-export function shrinkpadding() {
-    padding -=4
-}
+
 /**
  * Render code + line numbers
  */
@@ -81,15 +72,3 @@ export function moveCursor() {
   cursor.style.top = (currentLine * lineHeight + offsetTop) + "px";
 }
 
-/**
- * Optional: reset editor state
- */
-export function resetEditor() {
-  codeLines.length = 0;
-  counthistory.length = 0;
-  history.length = 0;
-  padding = 0;
-  counter = 0;
-  currentLine = 0;
-  render();
-}
