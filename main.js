@@ -1,5 +1,5 @@
-import { Graph } from "./graph.js";
-import { formatWeight, parsePath, parseWeightValue, applyWeightUpdates } from "./utils.js";
+import { Graph } from './graph.js';
+import { formatWeight, parsePath, parseWeightValue, applyWeightUpdates } from './utils.js';
 export let graph = null;
 export const labels = [];
 export const colorlabels = [];
@@ -12,103 +12,98 @@ let queueMode;
 let edge_matrix = null;
 export function checkinput(input) {
   if (graph == null) {
-    alert("zadajte najprv počet vrcholov");
+    alert('zadajte najprv počet vrcholov');
     return false;
   }
 
   const inp = Number(input);
 
   if (!Number.isInteger(inp) || inp <= 0) {
-    alert("Zadajte kladné celé číslo väčšie ako 0");
+    alert('Zadajte kladné celé číslo väčšie ako 0');
     return false;
   }
 
   return true;
 }
 
-
 function promptManualEdges() {
-  console.log("promptManualEdges called")
-    const matrix = Array.from(
-        { length: numVertices },
-        () => Array(numVertices).fill(Infinity)
-    );
+  console.log('promptManualEdges called');
+  const matrix = Array.from({ length: numVertices }, () => Array(numVertices).fill(Infinity));
 
-    // distance from a vertex to itself
-    for (let i = 0; i < numVertices; i++) {
-        matrix[i][i] = 0;
+  // distance from a vertex to itself
+  for (let i = 0; i < numVertices; i++) {
+    matrix[i][i] = 0;
+  }
+
+  const before = currentMode;
+  currentMode = 'hrana';
+
+  try {
+    for (let from = 0; from < numVertices; from++) {
+      const input = prompt(
+        `Zadajte hrany vychádzajúce z vrcholu ${from + 1} (napr. 2:3,4:1)\nPrázdne pole = žiadne hrany`
+      );
+
+      if (input === null) break;
+      if (input.trim() === '') continue;
+
+      for (const edge of input.split(',')) {
+        const [to, weight] = edge.split(':').map((s) => s.trim());
+
+        matrix[from][Number(to) - 1] = Number(weight);
+      }
     }
+  } finally {
+    currentMode = before;
+  }
 
-    const before = currentMode;
-    currentMode = "hrana";
-
-    try {
-        for (let from = 0; from < numVertices; from++) {
-            const input = prompt(
-                `Zadajte hrany vychádzajúce z vrcholu ${from + 1} (napr. 2:3,4:1)\nPrázdne pole = žiadne hrany`
-            );
-
-            if (input === null) break;
-            if (input.trim() === "") continue;
-
-            for (const edge of input.split(",")) {
-                const [to, weight] = edge.split(":").map(s => s.trim());
-
-                matrix[from][Number(to) - 1] = Number(weight);
-            }
-        }
-    } finally {
-        currentMode = before;
-    }
-
-    return matrix;
+  return matrix;
 }
 function promptNumVertices() {
-  return new Promise(resolve => {
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.inset = "0";
-    overlay.style.background = "rgba(0, 0, 0, 0.6)";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = "1000";
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(0, 0, 0, 0.6)';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '1000';
 
-    const dialog = document.createElement("div");
-    dialog.style.background = "#fff";
-    dialog.style.borderRadius = "12px";
-    dialog.style.padding = "24px";
-    dialog.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25)";
-    dialog.style.maxWidth = "320px";
-    dialog.style.width = "100%";
-    dialog.style.textAlign = "center";
+    const dialog = document.createElement('div');
+    dialog.style.background = '#fff';
+    dialog.style.borderRadius = '12px';
+    dialog.style.padding = '24px';
+    dialog.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)';
+    dialog.style.maxWidth = '320px';
+    dialog.style.width = '100%';
+    dialog.style.textAlign = 'center';
 
-    const title = document.createElement("h3");
-    title.textContent = "Zadaj počet vrcholov grafu:";
-    title.style.margin = "0 0 16px";
+    const title = document.createElement('h3');
+    title.textContent = 'Zadaj počet vrcholov grafu:';
+    title.style.margin = '0 0 16px';
 
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = "1";
-    input.step = "1";
-    input.placeholder = "napr. 4";
-    input.style.display = "block";
-    input.style.width = "100%";
-    input.style.boxSizing = "border-box";
-    input.style.marginBottom = "16px";
-    input.style.padding = "8px";
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '1';
+    input.step = '1';
+    input.placeholder = 'napr. 4';
+    input.style.display = 'block';
+    input.style.width = '100%';
+    input.style.boxSizing = 'border-box';
+    input.style.marginBottom = '16px';
+    input.style.padding = '8px';
+    const buttonRow = document.createElement('div');
+    buttonRow.style.display = 'flex';
+    buttonRow.style.justifyContent = 'center';
+    buttonRow.style.gap = '12px';
 
-    const buttonRow = document.createElement("div");
-    buttonRow.style.display = "flex";
-    buttonRow.style.justifyContent = "center";
-    buttonRow.style.gap = "12px";
-
-    const okButton = document.createElement("button");
-    okButton.textContent = "OK";
+    const okButton = document.createElement('button');
+    okButton.textContent = 'OK';
     okButton.onclick = () => {
       const value = Number.parseInt(input.value, 10);
       if (!Number.isInteger(value) || value <= 0) {
-        alert("Zadajte kladné celé číslo väčšie ako 0");
+        alert('Zadajte kladné celé číslo väčšie ako 0');
         return;
       }
 
@@ -117,8 +112,8 @@ function promptNumVertices() {
       resolve(value);
     };
 
-    const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Zrušiť";
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Zrušiť';
     cancelButton.onclick = () => {
       overlay.remove();
       resolve(null);
@@ -136,36 +131,36 @@ function promptNumVertices() {
 }
 
 function showInitialModePopup() {
-  console.log("showInitialModePopup called");
-  return new Promise(resolve => {
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.inset = "0";
-    overlay.style.background = "rgba(0, 0, 0, 0.6)";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = "1000";
+  console.log('showInitialModePopup called');
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(0, 0, 0, 0.6)';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '1000';
 
-    const dialog = document.createElement("div");
-    dialog.style.background = "#fff";
-    dialog.style.borderRadius = "12px";
-    dialog.style.padding = "24px";
-    dialog.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25)";
-    dialog.style.maxWidth = "420px";
-    dialog.style.textAlign = "center";
+    const dialog = document.createElement('div');
+    dialog.style.background = '#fff';
+    dialog.style.borderRadius = '12px';
+    dialog.style.padding = '24px';
+    dialog.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)';
+    dialog.style.maxWidth = '420px';
+    dialog.style.textAlign = 'center';
 
-    const title = document.createElement("h3");
-    title.textContent = "Chcete použiť príklad alebo zadať hrany manuálne?";
-    title.style.margin = "0 0 16px";
+    const title = document.createElement('h3');
+    title.textContent = 'Chcete použiť príklad alebo zadať hrany manuálne?';
+    title.style.margin = '0 0 16px';
 
-    const buttonRow = document.createElement("div");
-    buttonRow.style.display = "flex";
-    buttonRow.style.justifyContent = "center";
-    buttonRow.style.gap = "12px";
+    const buttonRow = document.createElement('div');
+    buttonRow.style.display = 'flex';
+    buttonRow.style.justifyContent = 'center';
+    buttonRow.style.gap = '12px';
 
-    const manualButton = document.createElement("button");
-    manualButton.textContent = "manualne";
+    const manualButton = document.createElement('button');
+    manualButton.textContent = 'manualne';
     manualButton.onclick = async () => {
       overlay.remove();
       const vertexCount = await promptNumVertices();
@@ -174,42 +169,42 @@ function showInitialModePopup() {
         return;
       }
       edge_matrix = promptManualEdges();
-      console.log("Manual edges matrix:", edge_matrix);
+      console.log('Manual edges matrix:', edge_matrix);
       resolve(true);
     };
 
-    const exampleButton = document.createElement("button");
-    exampleButton.textContent = "príklad";
+    const exampleButton = document.createElement('button');
+    exampleButton.textContent = 'príklad';
     exampleButton.onclick = () => {
       overlay.remove();
 
-      const sizeOverlay = document.createElement("div");
-      sizeOverlay.style.position = "fixed";
-      sizeOverlay.style.inset = "0";
-      sizeOverlay.style.background = "rgba(0, 0, 0, 0.6)";
-      sizeOverlay.style.display = "flex";
-      sizeOverlay.style.alignItems = "center";
-      sizeOverlay.style.justifyContent = "center";
-      sizeOverlay.style.zIndex = "1001";
+      const sizeOverlay = document.createElement('div');
+      sizeOverlay.style.position = 'fixed';
+      sizeOverlay.style.inset = '0';
+      sizeOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
+      sizeOverlay.style.display = 'flex';
+      sizeOverlay.style.alignItems = 'center';
+      sizeOverlay.style.justifyContent = 'center';
+      sizeOverlay.style.zIndex = '1001';
 
-      const sizeDialog = document.createElement("div");
-      sizeDialog.style.background = "#fff";
-      sizeDialog.style.borderRadius = "12px";
-      sizeDialog.style.padding = "24px";
-      sizeDialog.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25)";
-      sizeDialog.style.maxWidth = "420px";
-      sizeDialog.style.width = "100%";
-      sizeDialog.style.textAlign = "center";
+      const sizeDialog = document.createElement('div');
+      sizeDialog.style.background = '#fff';
+      sizeDialog.style.borderRadius = '12px';
+      sizeDialog.style.padding = '24px';
+      sizeDialog.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)';
+      sizeDialog.style.maxWidth = '420px';
+      sizeDialog.style.width = '100%';
+      sizeDialog.style.textAlign = 'center';
 
-      const sizeTitle = document.createElement("h3");
-      sizeTitle.textContent = "Vyberte počet vrcholov príkladu:";
-      sizeTitle.style.margin = "0 0 16px";
+      const sizeTitle = document.createElement('h3');
+      sizeTitle.textContent = 'Vyberte počet vrcholov príkladu:';
+      sizeTitle.style.margin = '0 0 16px';
 
-      const sizeButtons = document.createElement("div");
-      sizeButtons.style.display = "flex";
-      sizeButtons.style.justifyContent = "center";
-      sizeButtons.style.gap = "10px";
-      sizeButtons.style.flexWrap = "wrap";
+      const sizeButtons = document.createElement('div');
+      sizeButtons.style.display = 'flex';
+      sizeButtons.style.justifyContent = 'center';
+      sizeButtons.style.gap = '10px';
+      sizeButtons.style.flexWrap = 'wrap';
 
       const buildExampleMatrix = (size) => {
         const matrix = Array.from({ length: size }, () => Array(size).fill(Infinity));
@@ -221,7 +216,7 @@ function showInitialModePopup() {
           return [
             [0, 3, Infinity],
             [10, 0, 4],
-            [5, Infinity, 0]
+            [5, Infinity, 0],
           ];
         }
 
@@ -231,16 +226,16 @@ function showInitialModePopup() {
         return matrix;
       };
 
-      [3, 6, 9].forEach(size => {
-        const sizeButton = document.createElement("button");
-        sizeButton.type = "button";
-        sizeButton.textContent = `${size}`+ (size === 3 ? " vrcholy" : " vrcholov");
+      [3, 6, 9].forEach((size) => {
+        const sizeButton = document.createElement('button');
+        sizeButton.type = 'button';
+        sizeButton.textContent = `${size}` + (size === 3 ? ' vrcholy' : ' vrcholov');
         sizeButton.onclick = () => {
           sizeOverlay.remove();
           numVertices = size;
 
           const before = currentMode;
-          currentMode = "hrana";
+          currentMode = 'hrana';
           try {
             edge_matrix = buildExampleMatrix(size);
           } finally {
@@ -268,25 +263,25 @@ function showInitialModePopup() {
 }
 
 const squareData = [
-  { title: "", label: "Square A", color: "#ff6b6b" },
-  { title: "", label: "Square B", color: "#ffd166" },
-  { title: "", label: "Square C", color: "#7bd389" },
-  { title: "", label: "Cesta s predĺžením", color: "blue" }
+  { title: '', label: 'Square A', color: '#ff6b6b' },
+  { title: '', label: 'Square B', color: '#ffd166' },
+  { title: '', label: 'Square C', color: '#7bd389' },
+  { title: '', label: 'Cesta s predĺžením', color: 'blue' },
 ];
 
 const squarePhaseStates = {
-  "cleanup": [],
-  "fixup-1": [],
-  "fixup-2": [],
-  "fixup-3": []
+  cleanup: [],
+  'fixup-1': [],
+  'fixup-2': [],
+  'fixup-3': [],
 };
 
-function normalizeSquarePhase(phase = "cleanup") {
-  if (phase == null || phase === "") return "cleanup";
+function normalizeSquarePhase(phase = 'cleanup') {
+  if (phase == null || phase === '') return 'cleanup';
 
   const value = String(phase).trim().toLowerCase();
-  if (value === "cleanup") return "cleanup";
-  if (value.startsWith("fixup")) {
+  if (value === 'cleanup') return 'cleanup';
+  if (value.startsWith('fixup')) {
     const match = value.match(/fixup[-_ ]?(\d+)/);
     if (match) return `fixup-${match[1]}`;
   }
@@ -307,10 +302,10 @@ export function assignPlaybackStepSquareLabel(
   hiddenB = false,
   hiddenC = false,
   hiddenD = true,
-  LabelD  = null
+  LabelD = null
 ) {
   let index = Number(stepValue);
-  let resolvedPhase = normalizeSquarePhase(phase) ?? "cleanup";
+  let resolvedPhase = normalizeSquarePhase(phase) ?? 'cleanup';
   let labelAValue = LabelA;
   let labelBValue = labelB;
   let labelCValue = labelC;
@@ -323,32 +318,31 @@ export function assignPlaybackStepSquareLabel(
   let hiddenBValue = hiddenB;
   let hiddenCValue = hiddenC;
   let hiddenDValue = hiddenD;
-  
 
   if (!Number.isInteger(index) || index < 0) return squarePhaseStates;
   if (!squarePhaseStates[resolvedPhase]) squarePhaseStates[resolvedPhase] = [];
 
   const state = [
     {
-      label: typeof labelAValue === "string" ? labelAValue : "",
-      color: typeof colorAValue === "string" ? colorAValue : "#999",
-      hidden: !!hiddenAValue
+      label: typeof labelAValue === 'string' ? labelAValue : '',
+      color: typeof colorAValue === 'string' ? colorAValue : '#999',
+      hidden: !!hiddenAValue,
     },
     {
-      label: typeof labelBValue === "string" ? labelBValue : "",
-      color: typeof colorBValue === "string" ? colorBValue : "#999",
-      hidden: !!hiddenBValue
+      label: typeof labelBValue === 'string' ? labelBValue : '',
+      color: typeof colorBValue === 'string' ? colorBValue : '#999',
+      hidden: !!hiddenBValue,
     },
     {
-      label: typeof labelCValue === "string" ? labelCValue : "",
-      color: typeof colorCValue === "string" ? colorCValue : "#999",
-      hidden: !!hiddenCValue
+      label: typeof labelCValue === 'string' ? labelCValue : '',
+      color: typeof colorCValue === 'string' ? colorCValue : '#999',
+      hidden: !!hiddenCValue,
     },
     {
-      label: LabelD === null ?"Cesta s predĺžením":LabelD,
-      color:  "blue",
-      hidden: !!hiddenDValue
-    }
+      label: LabelD === null ? 'Cesta s predĺžením' : LabelD,
+      color: 'blue',
+      hidden: !!hiddenDValue,
+    },
   ];
 
   squarePhaseStates[resolvedPhase][index] = state;
@@ -364,24 +358,24 @@ export function changeSquareAppearance(index, label, color, hidden = false) {
   const square = squareData[squareIndex];
   if (!square) return;
 
-  if (typeof label !== "undefined") {
+  if (typeof label !== 'undefined') {
     square.label = String(label);
   }
 
-  if (typeof color !== "undefined") {
+  if (typeof color !== 'undefined') {
     square.color = String(color);
   }
 
   const row = document.querySelector(`[data-square-index="${squareIndex}"]`);
   if (!row) return;
 
-  const preview = row.querySelector(".square-preview");
-  const labelNode = row.querySelector(".square-label");
+  const preview = row.querySelector('.square-preview');
+  const labelNode = row.querySelector('.square-label');
 
   if (preview) preview.style.backgroundColor = square.color;
   if (labelNode) labelNode.textContent = square.label;
 
-  row.style.display = hidden ? "none" : "flex";
+  row.style.display = hidden ? 'none' : 'flex';
 }
 
 export function saveSquareLabelState(stepNumber, stateOverride = null, phase = null) {
@@ -393,10 +387,12 @@ export function saveSquareLabelState(stepNumber, stateOverride = null, phase = n
     : squareData.map((square) => ({
         label: square.label,
         color: square.color,
-        hidden: document.querySelector(`[data-square-index="${squareData.indexOf(square)}"]`)?.style.display === "none"
+        hidden:
+          document.querySelector(`[data-square-index="${squareData.indexOf(square)}"]`)?.style
+            .display === 'none',
       }));
 
-  const resolvedPhase = normalizeSquarePhase(phase) ?? "cleanup";
+  const resolvedPhase = normalizeSquarePhase(phase) ?? 'cleanup';
   if (squarePhaseStates[resolvedPhase]) {
     squarePhaseStates[resolvedPhase][index] = snapshot;
   }
@@ -405,13 +401,17 @@ export function saveSquareLabelState(stepNumber, stateOverride = null, phase = n
   return squareLabelSnapshots;
 }
 
-export function drawSquareLabelsFromPlayback(playbackLabels = [], stepNumber = 0, phase = "cleanup") {
+export function drawSquareLabelsFromPlayback(
+  playbackLabels = [],
+  stepNumber = 0,
+  phase = 'cleanup'
+) {
   if (!Array.isArray(playbackLabels)) return [];
 
   const safeIndex = Number(stepNumber);
   if (!Number.isInteger(safeIndex) || safeIndex < 0) return playbackLabels;
 
-  const resolvedPhase = normalizeSquarePhase(phase) ?? "cleanup";
+  const resolvedPhase = normalizeSquarePhase(phase) ?? 'cleanup';
   const phaseState = Array.isArray(squarePhaseStates[resolvedPhase]?.[safeIndex])
     ? squarePhaseStates[resolvedPhase][safeIndex]
     : null;
@@ -426,45 +426,49 @@ export function drawSquareLabelsFromPlayback(playbackLabels = [], stepNumber = 0
 
   const labelsToApply = playbackLabels.slice(0, squareData.length);
   labelsToApply.forEach((label, idx) => {
-    const currentColor = squareData[idx]?.color || "#999";
-    if (typeof label === "string" && label.trim()) {
+    const currentColor = squareData[idx]?.color || '#999';
+    if (typeof label === 'string' && label.trim()) {
       changeSquareAppearance(idx, label, currentColor);
     }
   });
 
-  saveSquareLabelState(safeIndex, labelsToApply.map((label, idx) => ({
-    label: typeof label === "string" ? label : squareData[idx]?.label || "",
-    color: squareData[idx]?.color || "#999",
-    hidden: false
-  })), resolvedPhase);
+  saveSquareLabelState(
+    safeIndex,
+    labelsToApply.map((label, idx) => ({
+      label: typeof label === 'string' ? label : squareData[idx]?.label || '',
+      color: squareData[idx]?.color || '#999',
+      hidden: false,
+    })),
+    resolvedPhase
+  );
 
   return playbackLabels;
 }
 
 function initSquarePanel() {
-  const panel = document.getElementById("color-square-panel");
+  const panel = document.getElementById('color-square-panel');
   if (!panel) return;
 
-  panel.innerHTML = "";
+  panel.innerHTML = '';
 
   squareData.forEach((square, index) => {
-    const row = document.createElement("div");
-    row.className = "square-item";
+    const row = document.createElement('div');
+    row.className = 'square-item';
     row.dataset.squareIndex = String(index);
 
-    const preview = document.createElement("div");
-    preview.className = "square-preview";
+    const preview = document.createElement('div');
+    preview.className = 'square-preview';
     preview.style.backgroundColor = square.color;
 
-    const info = document.createElement("div");
-    info.className = "square-info";
+    const info = document.createElement('div');
+    info.className = 'square-info';
 
-    const title = document.createElement("div");
-    title.className = "square-title";
+    const title = document.createElement('div');
+    title.className = 'square-title';
     title.textContent = square.title;
 
-    const label = document.createElement("div");
-    label.className = "square-label";
+    const label = document.createElement('div');
+    label.className = 'square-label';
     label.textContent = square.label;
 
     info.appendChild(title);
@@ -475,8 +479,7 @@ function initSquarePanel() {
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-
+window.addEventListener('DOMContentLoaded', () => {
   initSquarePanel();
 
   // 🔥 expose to HTML
@@ -498,17 +501,17 @@ export function modifyPlaybackStepLabel(labels, stepNumber, newLabel) {
 }
 
 export function buildPlaybackStepLabel({ phase, index, isActive = false }) {
-  const phaseKey = phase?.key ?? "cleanup";
-  const phaseNumber = phaseKey.startsWith("fixup-") ? Number(phaseKey.split("-")[1]) : null;
-  const phaseName = phaseKey === "cleanup" ? "cleanup" : `fixup ${phaseNumber ?? 1}`;
+  const phaseKey = phase?.key ?? 'cleanup';
+  const phaseNumber = phaseKey.startsWith('fixup-') ? Number(phaseKey.split('-')[1]) : null;
+  const phaseName = phaseKey === 'cleanup' ? 'cleanup' : `fixup ${phaseNumber ?? 1}`;
   const stepIndex = index + 1;
 
   if (isActive) {
     return `${phaseName} – aktuálny stav`;
   }
 
-  if (phaseKey === "cleanup") {
-    return "cleanup – stav";
+  if (phaseKey === 'cleanup') {
+    return 'cleanup – stav';
   }
 
   return `${phaseName} – krok ${stepIndex}`;
@@ -516,21 +519,21 @@ export function buildPlaybackStepLabel({ phase, index, isActive = false }) {
 
 function restoreMainGraphPerspective() {
   if (updateCardsApp?.updates) {
-    updateCardsApp.updates.forEach(update => {
+    updateCardsApp.updates.forEach((update) => {
       update.selected = null;
     });
   }
 
-  cyPerspective = "graph";
+  cyPerspective = 'graph';
   setPerspectiveControlsVisible(true);
 
   const graphRadio = document.querySelector('input[name="cyPerspective"][value="graph"]');
   if (graphRadio) graphRadio.checked = true;
 
-  changeSquareAppearance(0, "Najkratšie cesty", "#999", false);
-  changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B", false);
-  changeSquareAppearance(2, "", "#7bd389", true);
-  changeSquareAppearance(3, "Cesta s predĺžením", "blue", true);
+  changeSquareAppearance(0, 'Najkratšie cesty', '#999', false);
+  changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B', false);
+  changeSquareAppearance(2, '', '#7bd389', true);
+  changeSquareAppearance(3, 'Cesta s predĺžením', 'blue', true);
 
   if (graph) {
     updateCytoscapeEdges(graph);
@@ -553,51 +556,66 @@ const updateCardsApp = Vue.createApp({
         savedStates: graph.savedStates,
         selected: null,
         phases: [
-          { key: "cleanup", title: "cleanup", description: `Odstránenie všetkých ciest obsahujúcich vrchol ${vertex + 1}` },
-          { key: "fixup-1", title: "fixup 1", description: `Nastavenie všetkých hrán obsahujúcich vrchol ${vertex + 1}` },
-          { key: "fixup-2", title: "fixup 2", description: "Zostavenie prioritného radu H s najkratšími cestami medzi každou dvojicou vrcholov`" },
-          { key: "fixup-3", title: "fixup 3", description: "Doplnenie lokálne najkratších a najkratších ciest" }
-        ]
+          {
+            key: 'cleanup',
+            title: 'cleanup',
+            description: `Odstránenie všetkých ciest obsahujúcich vrchol ${vertex + 1}`,
+          },
+          {
+            key: 'fixup-1',
+            title: 'fixup 1',
+            description: `Nastavenie všetkých hrán obsahujúcich vrchol ${vertex + 1}`,
+          },
+          {
+            key: 'fixup-2',
+            title: 'fixup 2',
+            description:
+              'Zostavenie prioritného radu H s najkratšími cestami medzi každou dvojicou vrcholov`',
+          },
+          {
+            key: 'fixup-3',
+            title: 'fixup 3',
+            description: 'Doplnenie lokálne najkratších a najkratších ciest',
+          },
+        ],
       });
     },
     selectPhase(update, phase) {
       update.selected = phase.key;
       setPerspectiveControlsVisible(false);
-      if (phase.key === "cleanup") {
+      if (phase.key === 'cleanup') {
         updateCytoscapeEdgesCode(update.cleanupSnapshot, null, update.cleanupOriginal);
-        changeSquareAppearance(0, "Najkratšie cesty", "#999");
-        changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B");
-        changeSquareAppearance(2, "Odstránené cesty", "red");
+        changeSquareAppearance(0, 'Najkratšie cesty', '#999');
+        changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B');
+        changeSquareAppearance(2, 'Odstránené cesty', 'red');
       } else {
         const phaseIndex = Number(phase.key.slice(-1)) - 1;
         const phaseSnapshots = update.fixupSnapshots?.[phaseIndex] || [];
         const snapshot = phaseSnapshots[phaseSnapshots.length - 1];
         let baselineGraph = update.cleanupSnapshot?.graph || null;
 
-        if (phase.key === "fixup-2") {
+        if (phase.key === 'fixup-2') {
           const previousPhase = update.fixupSnapshots?.[0] || [];
           const previousSnapshot = previousPhase[previousPhase.length - 1];
           baselineGraph = previousSnapshot?.graph || baselineGraph;
-        } else if (phase.key === "fixup-3") {
+        } else if (phase.key === 'fixup-3') {
           const previousPhase = update.fixupSnapshots?.[1] || [];
           const previousSnapshot = previousPhase[previousPhase.length - 1];
           baselineGraph = previousSnapshot?.graph || baselineGraph;
         }
 
-        if (phase.key === "fixup-1") {
-          changeSquareAppearance(0, "pridané hrany", "green");
-          changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B", true);
-          changeSquareAppearance(2, "pridané hrany", "green", true);
-        }
-        else if (phase.key === "fixup-2") {
-          changeSquareAppearance(0, "pridané hrany", "green");
-          changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B", true);
-          changeSquareAppearance(2, "cesty pridané do radu H", "green", true);
-        }
-        else if (phase.key === "fixup-3") {
-          changeSquareAppearance(0, "Najkratšie cesty", "#999");
-          changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B");
-          changeSquareAppearance(2, "Ostatné cesty", "green");
+        if (phase.key === 'fixup-1') {
+          changeSquareAppearance(0, 'pridané hrany', 'green');
+          changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B', true);
+          changeSquareAppearance(2, 'pridané hrany', 'green', true);
+        } else if (phase.key === 'fixup-2') {
+          changeSquareAppearance(0, 'pridané hrany', 'green');
+          changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B', true);
+          changeSquareAppearance(2, 'cesty pridané do radu H', 'green', true);
+        } else if (phase.key === 'fixup-3') {
+          changeSquareAppearance(0, 'Najkratšie cesty', '#999');
+          changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B');
+          changeSquareAppearance(2, 'Ostatné cesty', 'green');
         }
         if (!snapshot) return;
         updateCytoscapeEdgesCode(
@@ -606,59 +624,58 @@ const updateCardsApp = Vue.createApp({
           null,
           phase.key,
           baselineGraph,
-          phase.key === "fixup-3" ? [] : snapshot.paths,
-          phase.key === "fixup-3" ? new Map() : snapshot.colors
+          phase.key === 'fixup-3' ? [] : snapshot.paths,
+          phase.key === 'fixup-3' ? new Map() : snapshot.colors
         );
       }
     },
     goBack() {
-      this.updates.forEach(update => {
+      this.updates.forEach((update) => {
         update.selected = null;
       });
       setPerspectiveControlsVisible(true);
       updateCytoscapeEdges(graph);
-      changeSquareAppearance(0, "Najkratšie cesty", "#999", false);
-      changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B", false);
-      changeSquareAppearance(2, "", "#7bd389", true);
-      changeSquareAppearance(3, "Cesta s predĺžením", "blue", true);
+      changeSquareAppearance(0, 'Najkratšie cesty', '#999', false);
+      changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B', false);
+      changeSquareAppearance(2, '', '#7bd389', true);
+      changeSquareAppearance(3, 'Cesta s predĺžením', 'blue', true);
       this.closePlayback();
     },
     startPlayback(update, phase) {
-      const phaseIndex = phase.key === "cleanup"
-        ? 0
-        : Number(phase.key.slice(-1)) - 1;
-      const saved = phase.key === "cleanup"
-        ? (update.savedStates || [])
-        : (update.fixupSnapshots?.[phaseIndex] || []);
+      const phaseIndex = phase.key === 'cleanup' ? 0 : Number(phase.key.slice(-1)) - 1;
+      const saved =
+        phase.key === 'cleanup'
+          ? update.savedStates || []
+          : update.fixupSnapshots?.[phaseIndex] || [];
       if (!saved.length) return;
-      const phaseLabels = phase.key === "cleanup"
-        ? (update.cleanupLabels || [])
-        : (labels.fixup?.[phaseIndex] || []);
+      const phaseLabels =
+        phase.key === 'cleanup' ? update.cleanupLabels || [] : labels.fixup?.[phaseIndex] || [];
       const initialState = saved[0];
       const steps = saved.map((state, index) =>
         buildPlaybackStepLabel({
           phase,
           index,
-          isActive: index === 0
+          isActive: index === 0,
         })
       );
       steps.forEach((step, index) => {
         if (phaseLabels[index] === undefined) phaseLabels[index] = step;
         steps[index] = phaseLabels[index];
       });
-      let goal = "";
-      switch(phase.key) {
-        case "cleanup":
+      let goal = '';
+      switch (phase.key) {
+        case 'cleanup':
           goal = `Odstránenie všetkých ciest obsahujúcich vrchol ${update.vertex}`;
           break;
-        case "fixup-1":
+        case 'fixup-1':
           goal = `Nastavenie všetkých hrán obsahujúcich vrchol ${update.vertex}`;
           break;
-        case "fixup-2":
-          goal = "Zostavenie prioritného radu H s najkratšími cestami medzi každou dvojicou vrcholov";
+        case 'fixup-2':
+          goal =
+            'Zostavenie prioritného radu H s najkratšími cestami medzi každou dvojicou vrcholov';
           break;
-        case "fixup-3":
-          goal = "Doplnenie lokálne najkratších a najkratších ciest";
+        case 'fixup-3':
+          goal = 'Doplnenie lokálne najkratších a najkratších ciest';
           break;
       }
       setPerspectiveControlsVisible(false);
@@ -668,16 +685,20 @@ const updateCardsApp = Vue.createApp({
         phase,
         steps,
         saved,
-        goal
+        goal,
       };
       this.currentStep = 0;
-      document.getElementById("playback-workspace")?.classList.remove("is-hidden");
-      const targetElement = document.getElementById("playback-target");
-      const stepsElement = document.getElementById("playback-steps");
+      document.getElementById('playback-workspace')?.classList.remove('is-hidden');
+      const targetElement = document.getElementById('playback-target');
+      const stepsElement = document.getElementById('playback-steps');
       if (targetElement) targetElement.textContent = goal;
-      if (stepsElement) stepsElement.innerHTML = `<ol>${steps.map((step, index) =>
-        `<li class="${index === this.currentStep ? "active" : ""}">${step}</li>`
-      ).join("")}</ol>`;
+      if (stepsElement)
+        stepsElement.innerHTML = `<ol>${steps
+          .map(
+            (step, index) =>
+              `<li class="${index === this.currentStep ? 'active' : ''}">${step}</li>`
+          )
+          .join('')}</ol>`;
       update.selected = phase.key;
       renderSavedGraphState(initialState);
     },
@@ -698,19 +719,19 @@ const updateCardsApp = Vue.createApp({
       }
     },
     updateWorkspaceStepList() {
-      const steps = document.querySelectorAll("#playback-steps li");
-      steps.forEach((step, index) => step.classList.toggle("active", index === this.currentStep));
+      const steps = document.querySelectorAll('#playback-steps li');
+      steps.forEach((step, index) => step.classList.toggle('active', index === this.currentStep));
     },
     closePlayback() {
       this.player = null;
       this.currentStep = 0;
       setPerspectiveControlsVisible(true);
-      document.getElementById("playback-workspace")?.classList.add("is-hidden");
-      const targetElement = document.getElementById("playback-target");
-      const stepsElement = document.getElementById("playback-steps");
-      if (targetElement) targetElement.textContent = "";
-      if (stepsElement) stepsElement.innerHTML = "";
-    }
+      document.getElementById('playback-workspace')?.classList.add('is-hidden');
+      const targetElement = document.getElementById('playback-target');
+      const stepsElement = document.getElementById('playback-steps');
+      if (targetElement) targetElement.textContent = '';
+      if (stepsElement) stepsElement.innerHTML = '';
+    },
   },
   template: `
     <div class="update-cards" aria-live="polite">
@@ -753,19 +774,19 @@ const updateCardsApp = Vue.createApp({
 
       </section>
     </div>
-  `
-}).mount("#update-app");
+  `,
+}).mount('#update-app');
 
-document.addEventListener("click", (event) => {
-  const clickedInsideUpdateApp = event.target.closest("#update-app");
-  const clickedInsidePlayback = event.target.closest("#playback-workspace");
-  const clickedInsidePerspective = event.target.closest("#cy-perspective-controls");
+document.addEventListener('click', (event) => {
+  const clickedInsideUpdateApp = event.target.closest('#update-app');
+  const clickedInsidePlayback = event.target.closest('#playback-workspace');
+  const clickedInsidePerspective = event.target.closest('#cy-perspective-controls');
 
   if (clickedInsideUpdateApp || clickedInsidePlayback || clickedInsidePerspective) {
     return;
   }
 
-  const hasStaticPreview = updateCardsApp?.updates?.some(update => update.selected);
+  const hasStaticPreview = updateCardsApp?.updates?.some((update) => update.selected);
   if (hasStaticPreview) {
     restoreMainGraphPerspective();
   }
@@ -777,63 +798,58 @@ function getLoopGeometry(source, target, index, total) {
   return {
     loopDirection: (360 / Math.max(total, 1)) * index,
     loopSweep: 45,
-    loopStep: 55
+    loopStep: 55,
   };
 }
 
 function addPaths(paths, id) {
-  const panel = document.getElementById("panel");
+  const panel = document.getElementById('panel');
 
-  const card = document.createElement("div");
-  card.className = "card";
-  card.id = "card-" + id;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'card-' + id;
 
   card.innerHTML = `<h3>Prioritný rad ${id}</h3>`;
 
-  paths.forEach(path => {
-    let pathstring = "{ " + (path.start + 1);
+  paths.forEach((path) => {
+    let pathstring = '{ ' + (path.start + 1);
     pathstring = parsePath(path, pathstring);
-    pathstring += "}";
+    pathstring += '}';
 
-    const button = document.createElement("button");
+    const button = document.createElement('button');
     button.textContent = pathstring;
 
-    const left =
-      path.l == null
-        ? "žiadna"
-        : parsePath(path.l, (path.l.start + 1).toString() + ",");
+    const left = path.l == null ? 'žiadna' : parsePath(path.l, (path.l.start + 1).toString() + ',');
 
     const right =
-      path.r == null
-        ? "žiadna"
-        : parsePath(path.r, (path.r.start + 1).toString() + ",");
+      path.r == null ? 'žiadna' : parsePath(path.r, (path.r.start + 1).toString() + ',');
 
-    const L = path.L?.map(p =>
-      parsePath(p, "{ " + (p.start + 1).toString()) + "}"
-    ).join(", ") || "žiadna";
+    const L =
+      path.L?.map((p) => parsePath(p, '{ ' + (p.start + 1).toString()) + '}').join(', ') ||
+      'žiadna';
 
-    const R = path.R?.map(p =>
-      parsePath(p, "{ " + (p.start + 1).toString()) + "}"
-    ).join(", ") || "žiadna";
+    const R =
+      path.R?.map((p) => parsePath(p, '{ ' + (p.start + 1).toString()) + '}').join(', ') ||
+      'žiadna';
 
-    const L_star = path.L_star?.map(p =>
-      parsePath(p, "{ " + (p.start + 1).toString()) + "}"
-    ).join(", ") || "žiadna";
+    const L_star =
+      path.L_star?.map((p) => parsePath(p, '{ ' + (p.start + 1).toString()) + '}').join(', ') ||
+      'žiadna';
 
-    const R_star = path.R_star?.map(p =>
-      parsePath(p, "{ " + (p.start + 1).toString()) + "}"
-    ).join(", ") || "žiadna";
+    const R_star =
+      path.R_star?.map((p) => parsePath(p, '{ ' + (p.start + 1).toString()) + '}').join(', ') ||
+      'žiadna';
 
     button.onclick = () => {
       alert(
         `cesta: ${pathstring}\n` +
-        `váha: ${formatWeight(path.weight)}\n` +
-        `l: ${left}\n` +
-        `r: ${right}\n` +
-        `L: ${L}\n` +
-        `R: ${R}\n` +
-        `L*: ${L_star}\n` +
-        `R*: ${R_star}`
+          `váha: ${formatWeight(path.weight)}\n` +
+          `l: ${left}\n` +
+          `r: ${right}\n` +
+          `L: ${L}\n` +
+          `R: ${R}\n` +
+          `L*: ${L_star}\n` +
+          `R*: ${R_star}`
       );
     };
 
@@ -843,68 +859,66 @@ function addPaths(paths, id) {
   panel.appendChild(card);
 }
 function createRadioButtons() {
-  const panel = document.getElementById("panel");
+  const panel = document.getElementById('panel');
 
-  const controls = document.createElement("div");
-  controls.id = "controls";
+  const controls = document.createElement('div');
+  controls.id = 'controls';
 
   // Radio 1
-  const labelL = document.createElement("label");
-  const radioL = document.createElement("input");
-  radioL.type = "radio";
-  radioL.name = "mode1";
-  radioL.value = "NonL";
+  const labelL = document.createElement('label');
+  const radioL = document.createElement('input');
+  radioL.type = 'radio';
+  radioL.name = 'mode1';
+  radioL.value = 'NonL';
 
-  radioL.addEventListener("change", function () {
+  radioL.addEventListener('change', function () {
     queueMode = this.value;
     resetShortestQueues();
   });
 
   labelL.appendChild(radioL);
-  labelL.appendChild(document.createTextNode(" Najkratšie cesty"));
+  labelL.appendChild(document.createTextNode(' Najkratšie cesty'));
 
   // Radio 2
-  const labelR = document.createElement("label");
-  const radioR = document.createElement("input");
-  radioR.type = "radio";
-  radioR.name = "mode1";
-  radioR.value = "L";
+  const labelR = document.createElement('label');
+  const radioR = document.createElement('input');
+  radioR.type = 'radio';
+  radioR.name = 'mode1';
+  radioR.value = 'L';
 
-  radioR.addEventListener("change", function () {
+  radioR.addEventListener('change', function () {
     queueMode = this.value;
     resetLocallyShortestQueues();
   });
 
   labelR.appendChild(radioR);
-  labelR.appendChild(document.createTextNode(" Lokálne najkratšie cesty"));
+  labelR.appendChild(document.createTextNode(' Lokálne najkratšie cesty'));
 
   controls.appendChild(labelL);
   controls.appendChild(labelR);
 
   panel.appendChild(controls);
 }
-function resetShortestQueues(){
-  document.getElementById("panel").innerHTML = "";
+function resetShortestQueues() {
+  document.getElementById('panel').innerHTML = '';
   createRadioButtons();
-  for (let i = 0; i < graph.V; i++){
-    for (let j = 0; j < graph.V; j++){
-      let path =graph.p_list[i][j].front();
-      if (path != null){
-        addPaths([path], (i+1).toString()+", "+(j+1).toString());
+  for (let i = 0; i < graph.V; i++) {
+    for (let j = 0; j < graph.V; j++) {
+      let path = graph.p_list[i][j].front();
+      if (path != null) {
+        addPaths([path], (i + 1).toString() + ', ' + (j + 1).toString());
       }
-
     }
   }
-
 }
-function resetLocallyShortestQueues(){
-  document.getElementById("panel").style.display = "none";
-  document.getElementById("panel").innerHTML = "";
+function resetLocallyShortestQueues() {
+  document.getElementById('panel').style.display = 'none';
+  document.getElementById('panel').innerHTML = '';
   createRadioButtons();
-  for (let i = 0; i < graph.V; i++){
-    for (let j = 0; j < graph.V; j++){
+  for (let i = 0; i < graph.V; i++) {
+    for (let j = 0; j < graph.V; j++) {
       let current = graph.p_list[i][j];
-      let whole = "cesty: "
+      let whole = 'cesty: ';
       let Q = [];
 
       let is = false;
@@ -915,14 +929,13 @@ function resetLocallyShortestQueues(){
 
         let pathstring = `{ ${path.start + 1}`;
         pathstring = parsePath(path, pathstring);
-        pathstring += "},";
+        pathstring += '},';
 
         whole += pathstring;
-        
       }
 
-      if (Q.length != 0){
-        addPaths(Q, (i+1).toString()+", "+(j+1).toString());
+      if (Q.length != 0) {
+        addPaths(Q, (i + 1).toString() + ', ' + (j + 1).toString());
       }
 
       for (let k = 0; k < Q.length; k++) current.enqueue(Q[k]);
@@ -933,7 +946,7 @@ function resetLocallyShortestQueues(){
 const tooltip = document.getElementById('path-tooltip');
 
 async function showName() {
-  console.log("showName called");
+  console.log('showName called');
   const previousNumVertices = numVertices;
   const previousEdgeMatrix = edge_matrix;
   numVertices = null;
@@ -947,18 +960,24 @@ async function showName() {
   }
 
   const elements = [];
-  console.log("Creating graph with", numVertices, "vertices and edge matrix:", edge_matrix);
+  console.log('Creating graph with', numVertices, 'vertices and edge matrix:', edge_matrix);
   let nextGraph;
-  try{
-      nextGraph = new Graph(numVertices,edge_matrix);
+  try {
+    nextGraph = new Graph(numVertices, edge_matrix);
   } catch (error) {
     numVertices = previousNumVertices;
     edge_matrix = previousEdgeMatrix;
-    if (!error.cause ) {
-        throw error;
+    if (!error.cause) {
+      throw error;
     }
-      alert(" Existuje viacero najkratších ciest medzi vrcholmi " + error.cause[0] + " a " + error.cause[1] + ". Algoritmus vyžaduje jedinečnú najkratšiu cestu medzi každou dvojicou vrcholov.");
-      return;
+    alert(
+      ' Existuje viacero najkratších ciest medzi vrcholmi ' +
+        error.cause[0] +
+        ' a ' +
+        error.cause[1] +
+        '. Algoritmus vyžaduje jedinečnú najkratšiu cestu medzi každou dvojicou vrcholov.'
+    );
+    return;
   }
 
   graph = nextGraph;
@@ -966,22 +985,21 @@ async function showName() {
   updateCardsApp.closePlayback();
   updateCardsApp.updates.splice(0);
   labels.length = 0;
-  labels.fixup?.forEach(phaseLabels => phaseLabels.splice(0));
+  labels.fixup?.forEach((phaseLabels) => phaseLabels.splice(0));
   colorlabels.length = 0;
   squareLabelSnapshots.length = 0;
-  Object.values(squarePhaseStates).forEach(phaseStates => phaseStates.splice(0));
+  Object.values(squarePhaseStates).forEach((phaseStates) => phaseStates.splice(0));
 
-  const codeModeButton = document.getElementById("codemode");
-  if (codeModeButton) codeModeButton.textContent = "mód pozerania kódu";
-  const startInput = document.getElementById("start");
-  const endInput = document.getElementById("end");
-  if (startInput) startInput.value = "";
-  if (endInput) endInput.value = "";
-  cyPerspective = "graph";
+  const codeModeButton = document.getElementById('codemode');
+  if (codeModeButton) codeModeButton.textContent = 'mód pozerania kódu';
+  const startInput = document.getElementById('start');
+  const endInput = document.getElementById('end');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+  cyPerspective = 'graph';
   setPerspectiveControlsVisible(true);
   const graphRadio = document.querySelector('input[name="cyPerspective"][value="graph"]');
   if (graphRadio) graphRadio.checked = true;
-
 
   //resetShortestQueues();
   resetLocallyShortestQueues();
@@ -1008,20 +1026,18 @@ async function showName() {
 
         elements.push({
           data: {
-            id: "e" + edgeId++,
+            id: 'e' + edgeId++,
             source: (path.start + 1).toString(),
             target: (path.end + 1).toString(),
             weight: formatWeight(path.weight),
-            color: count === 0 ? "#999" : "#FF851B",
+            color: count === 0 ? '#999' : '#FF851B',
             pathObj: path,
             ...getLoopGeometry(path.start, path.end, count, totalPaths),
           },
         });
-      console.log(`Added ${count} edge from ${i + 1} to ${j + 1}`);
-            count++;
-              }
-
-
+        console.log(`Added ${count} edge from ${i + 1} to ${j + 1}`);
+        count++;
+      }
 
       for (const path of temp) {
         queue.enqueue(path);
@@ -1035,243 +1051,229 @@ async function showName() {
     cy = null;
   }
   cy = cytoscape({
-    container: document.getElementById("cy"),
+    container: document.getElementById('cy'),
     elements: elements,
 
     style: [
       {
-        selector: "node",
+        selector: 'node',
         style: {
-          "background-color": "#0074D9",
-          label: "data(label)",
-          color: "#fff",
-          "text-valign": "center",
-          "text-halign": "center",
+          'background-color': '#0074D9',
+          label: 'data(label)',
+          color: '#fff',
+          'text-valign': 'center',
+          'text-halign': 'center',
           width: nodeSize,
           height: nodeSize,
-          "font-size": fontSize,
+          'font-size': fontSize,
         },
       },
       {
-        selector: "edge",
+        selector: 'edge',
         style: {
-          "curve-style": "bezier",
-          "target-arrow-shape": "triangle",
-          label: "data(weight)",
-          "font-size": Math.max(8, fontSize * 0.8),
-          "text-background-color": "white",
-          "text-background-opacity": 1,
-          "text-background-padding": "2px",
-          "line-color": "data(color)",         
-          "target-arrow-color": "data(color)",  
-          "loop-direction": "data(loopDirection)",
-          "loop-sweep": "data(loopSweep)",
-          "control-point-step-size": "data(loopStep)",
+          'curve-style': 'bezier',
+          'target-arrow-shape': 'triangle',
+          label: 'data(weight)',
+          'font-size': Math.max(8, fontSize * 0.8),
+          'text-background-color': 'white',
+          'text-background-opacity': 1,
+          'text-background-padding': '2px',
+          'line-color': 'data(color)',
+          'target-arrow-color': 'data(color)',
+          'loop-direction': 'data(loopDirection)',
+          'loop-sweep': 'data(loopSweep)',
+          'control-point-step-size': 'data(loopStep)',
         },
       },
       {
-        selector: ".clicked",
+        selector: '.clicked',
         style: {
-          "border-color": "green",
-          "border-width": 3,
+          'border-color': 'green',
+          'border-width': 3,
         },
       },
     ],
 
-    layout: { name: "circle" },
+    layout: { name: 'circle' },
   });
-let selectedNode = null;
+  let selectedNode = null;
 
-cy.on("tap", "node", function (evt) {
-  const node = evt.target;
+  cy.on('tap', 'node', function (evt) {
+    const node = evt.target;
 
-  if (!selectedNode) {
-    selectedNode = parseInt(node.id());
-    node.addClass("clicked");
-    return;
-  }
+    if (!selectedNode) {
+      selectedNode = parseInt(node.id());
+      node.addClass('clicked');
+      return;
+    }
 
-  const node2 = parseInt(node.id());
+    const node2 = parseInt(node.id());
 
-  cy.nodes().removeClass("clicked");
+    cy.nodes().removeClass('clicked');
 
-  let weight = prompt(`Zadajte dĺžku hrany: ${selectedNode}, ${node2}`);
-  if (weight === null) {
-    selectedNode = null;
-    return;
-  }
+    let weight = prompt(`Zadajte dĺžku hrany: ${selectedNode}, ${node2}`);
+    if (weight === null) {
+      selectedNode = null;
+      return;
+    }
 
-  let win = `${node2}:${weight}`;
-  let wout = "";
+    let win = `${node2}:${weight}`;
+    let wout = '';
 
-  const before = currentMode;
-  currentMode = "hrana";
+    const before = currentMode;
+    currentMode = 'hrana';
 
-  try {
-    doupdate(selectedNode, win, wout);
-  } finally {
-    currentMode = before;
-    selectedNode = null;
-  }
-});
+    try {
+      doupdate(selectedNode, win, wout);
+    } finally {
+      currentMode = before;
+      selectedNode = null;
+    }
+  });
 
+  // 1. Hover nad hranou - Zobraziť a naplniť box dáta-mi
+  cy.on('mouseover', 'edge', (evt) => {
+    const edge = evt.target;
+    const pathData = edge.data('pathObj');
 
-// 1. Hover nad hranou - Zobraziť a naplniť box dáta-mi
-cy.on('mouseover', 'edge', (evt) => {
-  const edge = evt.target;
-  const pathData = edge.data('pathObj');
-  
-  if (pathData) {
-    edge.style({ 'width': 6 }); // Vizuálny hover efekt
+    if (pathData) {
+      edge.style({ width: 6 }); // Vizuálny hover efekt
 
-    // Vygenerujeme rovnaký obsah z vlastností objektu Path
-    tooltip.innerHTML = `
+      // Vygenerujeme rovnaký obsah z vlastností objektu Path
+      tooltip.innerHTML = `
       <strong style="color:#333;">Informácie o ceste</strong><br>
-      <strong>Vrcholy</strong> ${parsePath(pathData, (pathData.start+1).toString())}<br>
+      <strong>Vrcholy</strong> ${parsePath(pathData, (pathData.start + 1).toString())}<br>
       <strong>Weight:</strong> ${pathData.weight === Infinity ? '∞' : pathData.weight}<br>
       <hr style="border: 0; border-top: 1px solid #ddd; margin: 6px 0;">
-      <strong>Skrátenie cesty o posledný vrchol (l):</strong> ${pathData.l === null ? 'neexistuje' : parsePath(pathData.l, (pathData.l.start+1).toString())}<br>
-      <strong>Skrátenie cesty o prvý vrchol (r):</strong> ${pathData.r === null ? 'neexistuje' : parsePath(pathData.r, (pathData.r.start+1).toString())}<br>
+      <strong>Skrátenie cesty o posledný vrchol (l):</strong> ${pathData.l === null ? 'neexistuje' : parsePath(pathData.l, (pathData.l.start + 1).toString())}<br>
+      <strong>Skrátenie cesty o prvý vrchol (r):</strong> ${pathData.r === null ? 'neexistuje' : parsePath(pathData.r, (pathData.r.start + 1).toString())}<br>
       <hr style="border: 0; border-top: 1px solid #ddd; margin: 6px 0;">
         <hr style="border: 0; border-top: 1px solid #ddd; margin: 6px 0;">
 
       <strong>Všetky cesty v L:</strong><br>
-      ${pathData.L?.length
-        ? pathData.L
-            .map(path => `{${parsePath(path, (path.start + 1).toString())}}`)
-            .join(', ')
-        : 'žiadne'
+      ${
+        pathData.L?.length
+          ? pathData.L.map((path) => `{${parsePath(path, (path.start + 1).toString())}}`).join(', ')
+          : 'žiadne'
       }
       <br><br>
 
       <strong>Všetky cesty v R:</strong><br>
-      ${pathData.R?.length
-        ? pathData.R
-            .map(path => `{${parsePath(path, (path.start + 1).toString())}}`)
-            .join(', ')
-        : 'žiadne'
+      ${
+        pathData.R?.length
+          ? pathData.R.map((path) => `{${parsePath(path, (path.start + 1).toString())}}`).join(', ')
+          : 'žiadne'
       }
     <hr style="border: 0; border-top: 1px solid #ddd; margin: 6px 0;">
       <strong>Všetky cesty v L*:</strong><br>
-      ${pathData.L_star?.length
-        ? pathData.L_star
-            .map(path => `{${parsePath(path, (path.start + 1).toString())}}`)
-            .join(', ')
-        : 'žiadne'
+      ${
+        pathData.L_star?.length
+          ? pathData.L_star.map((path) => `{${parsePath(path, (path.start + 1).toString())}}`).join(
+              ', '
+            )
+          : 'žiadne'
       }
       <br><br>
 
       <strong>Všetky cesty v R*:</strong><br>
-      ${pathData.R_star?.length
-        ? pathData.R_star
-            .map(path => `{${parsePath(path, (path.start + 1).toString())}}`)
-            .join(', ')
-        : 'žiadne'
+      ${
+        pathData.R_star?.length
+          ? pathData.R_star.map((path) => `{${parsePath(path, (path.start + 1).toString())}}`).join(
+              ', '
+            )
+          : 'žiadne'
       };
 
     `;
-    
-    tooltip.style.display = 'block'; // Zobrazíme box
-  }
-});
 
-// 2. Pohyb myši nad hranou - Dynamické posúvanie boxu s kurzorom
-cy.on('mousemove', 'edge', (evt) => {
-  const origin = evt.originalEvent;
-  
-  // Posunieme box o 15px doprava a 15px nadol od kurzora, aby nezavadzal pod šípkou
-  tooltip.style.left = (origin.pageX + 15) + 'px';
-  tooltip.style.top = (origin.pageY + 15) + 'px';
-});
+      tooltip.style.display = 'block'; // Zobrazíme box
+    }
+  });
 
-// 3. Odchod myši z hrany - Skryť box
-cy.on('mouseout', 'edge', (evt) => {
-  evt.target.removeStyle(); // Vrátime pôvodnú hrúbku hrany
-  tooltip.style.display = 'none'; // Skryjeme box
-});
-console.log(
-  "square panel:",
-  document.getElementById("color-square-panel")
-);
+  // 2. Pohyb myši nad hranou - Dynamické posúvanie boxu s kurzorom
+  cy.on('mousemove', 'edge', (evt) => {
+    const origin = evt.originalEvent;
 
-console.log(
-  "square rows:",
-  document.querySelectorAll("[data-square-index]")
-);
-  changeSquareAppearance(0, "Najkratšie cesty", "#999", false);
-  changeSquareAppearance(1, "Lokálne najkratšie cesty", "#FF851B",false);
+    // Posunieme box o 15px doprava a 15px nadol od kurzora, aby nezavadzal pod šípkou
+    tooltip.style.left = origin.pageX + 15 + 'px';
+    tooltip.style.top = origin.pageY + 15 + 'px';
+  });
+
+  // 3. Odchod myši z hrany - Skryť box
+  cy.on('mouseout', 'edge', (evt) => {
+    evt.target.removeStyle(); // Vrátime pôvodnú hrúbku hrany
+    tooltip.style.display = 'none'; // Skryjeme box
+  });
+  console.log('square panel:', document.getElementById('color-square-panel'));
+
+  console.log('square rows:', document.querySelectorAll('[data-square-index]'));
+  changeSquareAppearance(0, 'Najkratšie cesty', '#999', false);
+  changeSquareAppearance(1, 'Lokálne najkratšie cesty', '#FF851B', false);
 }
 
 function getdistance(x, y) {
-
-  if (!checkinput(x) || !checkinput(y))
-  {
+  if (!checkinput(x) || !checkinput(y)) {
     return;
   }
 
   x = parseInt(x) - 1;
   y = parseInt(y) - 1;
-  if ((x >=graph.V ) ||(  y >=graph.V ))
-  {
-    alert("vyplnte správne začiatočný a koncový vrchol");
+  if (x >= graph.V || y >= graph.V) {
+    alert('vyplnte správne začiatočný a koncový vrchol');
     return;
   }
 
-  
   const result = graph.distance(x, y);
-  showVertexResult(`Vzdialenosť medzi vrcholmi ${x + 1} a ${y + 1} je ${result === Infinity ? "nekonečno" : result}.`);
-
+  showVertexResult(
+    `Vzdialenosť medzi vrcholmi ${x + 1} a ${y + 1} je ${result === Infinity ? 'nekonečno' : result}.`
+  );
 }
 
 function showVertexResult(message) {
-  document.querySelector(".vertex-dialog-kicker").hidden = true;
-  document.querySelector(".vertex-dialog-fields").hidden = true;
-  document.querySelector(".vertex-dialog-actions").hidden = true;
-  document.getElementById("vertex-dialog-title").textContent = message;
+  document.querySelector('.vertex-dialog-kicker').hidden = true;
+  document.querySelector('.vertex-dialog-fields').hidden = true;
+  document.querySelector('.vertex-dialog-actions').hidden = true;
+  document.getElementById('vertex-dialog-title').textContent = message;
 }
 
 let pendingVertexCallback = null;
 
 function askForVertices(callback) {
   if (graph === null) {
-    alert("zadajte najprv počet vrcholov");
+    alert('zadajte najprv počet vrcholov');
     return;
   }
 
-  const dialog = document.getElementById("vertex-dialog");
-  const startInput = document.getElementById("vertex-start");
-  const endInput = document.getElementById("vertex-end");
-  const dialogTitle = document.getElementById("vertex-dialog-title");
-  const submitButton = document.getElementById("vertex-dialog-submit");
+  const dialog = document.getElementById('vertex-dialog');
+  const startInput = document.getElementById('vertex-start');
+  const endInput = document.getElementById('vertex-end');
+  const dialogTitle = document.getElementById('vertex-dialog-title');
+  const submitButton = document.getElementById('vertex-dialog-submit');
 
   pendingVertexCallback = callback;
-  startInput.value = "";
-  endInput.value = "";
+  startInput.value = '';
+  endInput.value = '';
   startInput.max = graph.V;
   endInput.max = graph.V;
-  document.querySelector(".vertex-dialog-kicker").hidden = false;
-  document.querySelector(".vertex-dialog-fields").hidden = false;
-  document.querySelector(".vertex-dialog-actions").hidden = false;
-  dialogTitle.textContent = callback === getdistance ? "Vzdialenosť" : "Cesta";
-  submitButton.textContent = callback === getdistance ? "Zobraziť vzdialenosť" : "Zobraziť cestu";
+  document.querySelector('.vertex-dialog-kicker').hidden = false;
+  document.querySelector('.vertex-dialog-fields').hidden = false;
+  document.querySelector('.vertex-dialog-actions').hidden = false;
+  dialogTitle.textContent = callback === getdistance ? 'Vzdialenosť' : 'Cesta';
+  submitButton.textContent = callback === getdistance ? 'Zobraziť vzdialenosť' : 'Zobraziť cestu';
   dialog.showModal();
   startInput.focus();
 }
 
 function getpath(x, y) {
-
-  if (!checkinput(x) || !checkinput(y))
-  {
+  if (!checkinput(x) || !checkinput(y)) {
     return;
   }
   x = parseInt(x) - 1;
   y = parseInt(y) - 1;
-  if ((x >=graph.V ) ||(  y >=graph.V ))
-  {
-    alert("vyplnte správne začiatočný a koncový vrchol");
+  if (x >= graph.V || y >= graph.V) {
+    alert('vyplnte správne začiatočný a koncový vrchol');
     return;
   }
-
 
   let result = graph.path(x, y);
 
@@ -1280,7 +1282,7 @@ function getpath(x, y) {
     return;
   }
 
-  const pathstring = parsePath(result, String(result.start + 1)).replace(/,/g, ", ");
+  const pathstring = parsePath(result, String(result.start + 1)).replace(/,/g, ', ');
   showVertexResult(`Cesta medzi vrcholmi ${x + 1} a ${y + 1} vedie cez vrcholy ${pathstring}.`);
 }
 
@@ -1316,129 +1318,134 @@ let pendingUpdateMode = null;
 
 function openUpdateDialog() {
   if (graph === null) {
-    alert("zadajte najprv počet vrcholov");
+    alert('zadajte najprv počet vrcholov');
     return;
   }
 
   pendingUpdateMode = null;
   currentMode = null;
-  ["update-vertex", "update-outgoing", "update-incoming", "update-targets", "update-sources"].forEach(id => {
+  [
+    'update-vertex',
+    'update-outgoing',
+    'update-incoming',
+    'update-targets',
+    'update-sources',
+  ].forEach((id) => {
     const input = document.getElementById(id);
-    input.value = "";
-    input.removeAttribute("aria-invalid");
+    input.value = '';
+    input.removeAttribute('aria-invalid');
   });
-  document.getElementById("update-mode-fields").hidden = false;
-  document.getElementById("update-entry-fields").hidden = true;
-  document.getElementById("update-dialog-actions").hidden = true;
-  document.getElementById("update-dialog-title").textContent = "Aktualizácia vrcholu";
-  document.getElementById("update-error").hidden = true;
-  document.getElementById("update-dialog").showModal();
+  document.getElementById('update-mode-fields').hidden = false;
+  document.getElementById('update-entry-fields').hidden = true;
+  document.getElementById('update-dialog-actions').hidden = true;
+  document.getElementById('update-dialog-title').textContent = 'Aktualizácia vrcholu';
+  document.getElementById('update-error').hidden = true;
+  document.getElementById('update-dialog').showModal();
 }
 
 function selectUpdateMode(mode) {
   pendingUpdateMode = mode;
   currentMode = mode;
-  document.getElementById("update-error").hidden = true;
-  document.getElementById("update-mode-fields").hidden = true;
-  document.getElementById("update-entry-fields").hidden = false;
-  document.getElementById("update-dialog-actions").hidden = false;
-  document.getElementById("update-all-inputs").hidden = mode !== "vektor";
-  document.getElementById("update-some-inputs").hidden = mode !== "hrana";
-  document.getElementById("update-dialog-title").textContent =
-    mode === "vektor" ? "Zadať všetky hrany" : "Zadať iba niektoré hrany";
-  document.getElementById("update-vertex").max = graph.V;
-  document.getElementById("update-vertex").focus();
+  document.getElementById('update-error').hidden = true;
+  document.getElementById('update-mode-fields').hidden = true;
+  document.getElementById('update-entry-fields').hidden = false;
+  document.getElementById('update-dialog-actions').hidden = false;
+  document.getElementById('update-all-inputs').hidden = mode !== 'vektor';
+  document.getElementById('update-some-inputs').hidden = mode !== 'hrana';
+  document.getElementById('update-dialog-title').textContent =
+    mode === 'vektor' ? 'Zadať všetky hrany' : 'Zadať iba niektoré hrany';
+  document.getElementById('update-vertex').max = graph.V;
+  document.getElementById('update-vertex').focus();
 }
 
 function doupdate(v, win, wout) {
-
-  if (!checkinput(v))
-  {
+  if (!checkinput(v)) {
     return false;
   }
-  if (v-1 >=graph.V){
-    alert("zle zadany vrchol");
+  if (v - 1 >= graph.V) {
+    alert('zle zadany vrchol');
     return false;
   }
-
 
   const v_start = parseInt(v) - 1;
-  if (isNaN(v_start))
-  {
-    alert("zadajte spravne meno vrcholu");
+  if (isNaN(v_start)) {
+    alert('zadajte spravne meno vrcholu');
     return false;
   }
   let w;
-  if (currentMode == "hrana"){
-const resultIn = Array(numVertices).fill(Infinity);
-const resultOut = Array(numVertices).fill(Infinity);
+  if (currentMode == 'hrana') {
+    const resultIn = Array(numVertices).fill(Infinity);
+    const resultOut = Array(numVertices).fill(Infinity);
 
-// load CURRENT graph values
-for (let i = 0; i < numVertices; i++) {
-  let temp = [];
-  while (!graph.p_list[v_start][i].isEmpty()) {
+    // load CURRENT graph values
+    for (let i = 0; i < numVertices; i++) {
+      let temp = [];
+      while (!graph.p_list[v_start][i].isEmpty()) {
+        let potential_path = graph.p_list[v_start][i].dequeue();
+        temp.push(potential_path);
+        if (
+          potential_path.start == potential_path.end ||
+          (potential_path.l.start === potential_path.l.end &&
+            potential_path.r.start === potential_path.r.end)
+        ) {
+          resultIn[i] = potential_path.weight;
+          break;
+        }
+      }
 
-    let potential_path = graph.p_list[v_start][i].dequeue();
-    temp.push(potential_path);
-    if ((potential_path.start == potential_path.end)|| potential_path.l.start === potential_path.l.end && potential_path.r.start === potential_path.r.end) {
-      resultIn[i] = potential_path.weight;
-      break;
+      for (const path of temp) {
+        graph.p_list[v_start][i].enqueue(path);
+      }
+      temp = [];
+      while (!graph.p_list[i][v_start].isEmpty()) {
+        let potential_path = graph.p_list[i][v_start].dequeue();
+        temp.push(potential_path);
+        if (
+          potential_path.start == potential_path.end ||
+          (potential_path.l.start === potential_path.l.end &&
+            potential_path.r.start === potential_path.r.end)
+        ) {
+          resultOut[i] = potential_path.weight;
+          break;
+        }
+      }
+
+      for (const path of temp) {
+        graph.p_list[i][v_start].enqueue(path);
+      }
     }
-  }
+    try {
+      applyWeightUpdates(win, resultIn);
+      if (resultIn[v_start] == Infinity) {
+        resultIn[v_start] = 0;
+      }
 
-  for (const path of temp) {
-    graph.p_list[v_start][i].enqueue(path);
-  }
-  temp = [];
-  while (!graph.p_list[i][v_start].isEmpty()) {
-
-    let potential_path = graph.p_list[i][v_start].dequeue();
-    temp.push(potential_path);
-    if ((potential_path.start == potential_path.end)|| potential_path.l.start === potential_path.l.end && potential_path.r.start === potential_path.r.end) {
-      resultOut[i] = potential_path.weight;
-      break;
+      applyWeightUpdates(wout, resultOut);
+    } catch (e) {
+      alert('zly vstup');
+      return false;
     }
-  }
-
-  for (const path of temp) {
-    graph.p_list[i][v_start].enqueue(path);
-  }
-}
-  try{
-    applyWeightUpdates(win, resultIn);
-    if (resultIn[v_start] == Infinity){
-      resultIn[v_start] = 0;
+    w = [resultIn, resultOut];
+    if (resultOut[v_start] == Infinity) {
+      resultOut[v_start] = 0;
     }
+  } else {
+    const parseArray = (str) => {
+      try {
+        // error
+        return str.split(',').map((value) => parseWeightValue(value));
+      } catch (e) {
+        alert('Zlý vstup');
+        return null;
+      }
+    };
 
-    applyWeightUpdates(wout, resultOut);
-  }
-  catch (e)
-  {
-    alert("zly vstup");
-    return false;
-  }
-  w = [resultIn,resultOut];
-  if (resultOut[v_start] == Infinity){
-    resultOut[v_start] = 0;
-  }
-  }
-  else{
-const parseArray = (str) => {
-  try {
-    // error
-    return str.split(",").map(value => parseWeightValue(value));
-  } catch (e) {
-    alert("Zlý vstup");
-    return null;
-  }
-};
+    const inArr = parseArray(win);
+    const outArr = parseArray(wout);
 
-const inArr = parseArray(win);
-const outArr = parseArray(wout);
+    if (!inArr || !outArr) return false;
 
-if (!inArr || !outArr) return false;
-
-w = [inArr, outArr];
+    w = [inArr, outArr];
   }
   const decreasedEdge = findWeightDecrease(v_start, w);
   if (decreasedEdge) {
@@ -1453,8 +1460,8 @@ w = [inArr, outArr];
   } catch (error) {
     if (error.cause) {
       alert(
-        "Update vytvára viacero najkratších ciest medzi vrcholmi " +
-        `${error.cause[0]} a ${error.cause[1]}. Update bol zamietnutý.`
+        'Update vytvára viacero najkratších ciest medzi vrcholmi ' +
+          `${error.cause[0]} a ${error.cause[1]}. Update bol zamietnutý.`
       );
       return false;
     }
@@ -1480,19 +1487,16 @@ function isPathInQueue(path, queue) {
     temp.push(current);
   }
 
-  temp.forEach(item => queue.enqueue(item));
+  temp.forEach((item) => queue.enqueue(item));
   return found;
 }
 
 function getPathEdgeColor(graph, path) {
-  if (!graph || !path) return "#999";
+  if (!graph || !path) return '#999';
 
-  const inStarList = isPathInQueue(
-    path,
-    graph.p_star_list?.[path.start]?.[path.end]
-  );
+  const inStarList = isPathInQueue(path, graph.p_star_list?.[path.start]?.[path.end]);
 
-  return inStarList ? "#999" : "#FF851B";
+  return inStarList ? '#999' : '#FF851B';
 }
 
 export function saveGraphState(sourceGraph = graph, paths = [], colors = new Map()) {
@@ -1500,8 +1504,8 @@ export function saveGraphState(sourceGraph = graph, paths = [], colors = new Map
 
   const snapshotGraph = sourceGraph.clone();
 
-  const pathSignature = path => {
-    if (!path) return "";
+  const pathSignature = (path) => {
+    if (!path) return '';
     let signature = `${path.start}-${path.end}`;
     let current = path;
     while (current.r != null) {
@@ -1511,7 +1515,7 @@ export function saveGraphState(sourceGraph = graph, paths = [], colors = new Map
     return signature;
   };
 
-  const mapPathToSnapshot = path => {
+  const mapPathToSnapshot = (path) => {
     if (!path) return null;
 
     for (let i = 0; i < snapshotGraph.V; i++) {
@@ -1519,13 +1523,16 @@ export function saveGraphState(sourceGraph = graph, paths = [], colors = new Map
         const queue = snapshotGraph.p_list[i][j];
         if (!queue || queue.isEmpty()) continue;
 
-        const match = queue.toArray().find(candidate =>
-          candidate &&
-          candidate.start === path.start &&
-          candidate.end === path.end &&
-          candidate.weight === path.weight &&
-          pathSignature(candidate) === pathSignature(path)
-        );
+        const match = queue
+          .toArray()
+          .find(
+            (candidate) =>
+              candidate &&
+              candidate.start === path.start &&
+              candidate.end === path.end &&
+              candidate.weight === path.weight &&
+              pathSignature(candidate) === pathSignature(path)
+          );
 
         if (match) return match;
       }
@@ -1537,7 +1544,7 @@ export function saveGraphState(sourceGraph = graph, paths = [], colors = new Map
   const savedState = {
     graph: snapshotGraph,
     paths: (Array.isArray(paths) ? paths : []).map(mapPathToSnapshot).filter(Boolean),
-    colors: colors instanceof Map ? new Map(colors) : new Map(Object.entries(colors || {}))
+    colors: colors instanceof Map ? new Map(colors) : new Map(Object.entries(colors || {})),
   };
 
   const targetGraphs = [sourceGraph];
@@ -1574,7 +1581,7 @@ function updateCytoscapeEdges(graph) {
   // Clear all existing edges from the Cytoscape canvas before redrawing
   cy.edges().remove();
 
-  if (cyPerspective === "edge") {
+  if (cyPerspective === 'edge') {
     for (let source = 0; source < graph.V; source++) {
       for (let target = 0; target < graph.V; target++) {
         if (source === target || graph.edgeMatrix[source][target] === Infinity) {
@@ -1587,8 +1594,8 @@ function updateCytoscapeEdges(graph) {
             source: (source + 1).toString(),
             target: (target + 1).toString(),
             weight: formatWeight(graph.edgeMatrix[source][target]),
-            color: "#999"
-          }
+            color: '#999',
+          },
         });
       }
     }
@@ -1619,7 +1626,7 @@ function updateCytoscapeEdges(graph) {
         const sourceNode = (path.start + 1).toString();
         const targetNode = (path.end + 1).toString();
 
-        // Generate a unique ID for the edge element. Append the array length 
+        // Generate a unique ID for the edge element. Append the array length
         // as a suffix index to safely handle duplicate/parallel paths between the same nodes
         const edgeId = `e_${i}_${j}_${tempPaths.length}`;
         const color = getPathEdgeColor(graph, path);
@@ -1633,7 +1640,7 @@ function updateCytoscapeEdges(graph) {
             weight: formatWeight(path.weight),
             color,
             pathObj: path,
-            ...getLoopGeometry(path.start, path.end, tempPaths.length - 1, queue.size())
+            ...getLoopGeometry(path.start, path.end, tempPaths.length - 1, queue.size()),
           },
         });
       }
@@ -1658,14 +1665,14 @@ export function updateCytoscapeEdgesCode(
   additionalPaths = [],
   pathColors = new Map()
 ) {
-  console.log("Updating Cytoscape edges with provided graph and parameters...");
+  console.log('Updating Cytoscape edges with provided graph and parameters...');
   if (!cy || !graph) return;
 
   cy.edges().remove();
 
   const edgeExists = new Set();
 
-  const pathSignature = path => {
+  const pathSignature = (path) => {
     let signature = `${path.start}-${path.end}`;
     let current = path;
     while (current.r != null) {
@@ -1680,7 +1687,7 @@ export function updateCytoscapeEdgesCode(
     for (let j = 0; j < graph.V; j++) {
       const queue = graph.p_list[i][j];
       if (!queue) continue;
-      queue.toArray().forEach(path => snapshotPaths.add(pathSignature(path)));
+      queue.toArray().forEach((path) => snapshotPaths.add(pathSignature(path)));
     }
   }
 
@@ -1688,17 +1695,16 @@ export function updateCytoscapeEdgesCode(
   if (baselineGraph) {
     for (let i = 0; i < baselineGraph.V; i++) {
       for (let j = 0; j < baselineGraph.V; j++) {
-        baselineGraph.p_list[i][j]?.toArray().forEach(path => {
+        baselineGraph.p_list[i][j]?.toArray().forEach((path) => {
           baselinePaths.add(pathSignature(path));
         });
       }
     }
   }
 
-
-  const getPathColor = path => {
+  const getPathColor = (path) => {
     const key = pathSignature(path);
-    if (typeof pathColors === "function") return pathColors(path);
+    if (typeof pathColors === 'function') return pathColors(path);
     if (pathColors instanceof Map) {
       return pathColors.get(key) ?? pathColors.get(pathSignature(path)) ?? null;
     }
@@ -1713,17 +1719,24 @@ export function updateCytoscapeEdgesCode(
       const queue = graph.p_list[i][j];
       if (!queue || queue.isEmpty()) continue;
 
-      const paths = highlightMode || pathColors instanceof Map && pathColors.size > 0
-        ? queue.toArray()
-        : [queue.front()];
+      const paths =
+        highlightMode || (pathColors instanceof Map && pathColors.size > 0)
+          ? queue.toArray()
+          : [queue.front()];
       paths.forEach((path, index) => {
         const u = path.start + 1;
         const v = path.end + 1;
-        const key = `${u-1}-${v-1}`;
+        const key = `${u - 1}-${v - 1}`;
         const explicitColor = getPathColor(path);
         let color = explicitColor || getPathEdgeColor(graph, path);
-        if (!explicitColor && (highlightMode === "fixup-1" || highlightMode === "fixup-2" || highlightMode === "fixup-3") && !baselinePaths.has(pathSignature(path))) {
-          color = "#16803c";
+        if (
+          !explicitColor &&
+          (highlightMode === 'fixup-1' ||
+            highlightMode === 'fixup-2' ||
+            highlightMode === 'fixup-3') &&
+          !baselinePaths.has(pathSignature(path))
+        ) {
+          color = '#16803c';
         }
 
         cy.add({
@@ -1733,8 +1746,8 @@ export function updateCytoscapeEdgesCode(
             target: `${v}`,
             weight: formatWeight(path.weight),
             color,
-            ...getLoopGeometry(path.start, path.end, index, paths.length)
-          }
+            ...getLoopGeometry(path.start, path.end, index, paths.length),
+          },
         });
 
         edgeExists.add(key);
@@ -1742,8 +1755,8 @@ export function updateCytoscapeEdgesCode(
     }
   }
 
-  const pathsToAdd = additionalPaths.filter(path =>
-    path && !snapshotPaths.has(pathSignature(path))
+  const pathsToAdd = additionalPaths.filter(
+    (path) => path && !snapshotPaths.has(pathSignature(path))
   );
   pathsToAdd.forEach((path, index) => {
     const source = path.start + 1;
@@ -1754,10 +1767,10 @@ export function updateCytoscapeEdgesCode(
         source: `${source}`,
         target: `${target}`,
         weight: formatWeight(path.weight),
-        color: getPathColor(path) || "#16803c",
+        color: getPathColor(path) || '#16803c',
         pathObj: path,
-        ...getLoopGeometry(path.start, path.end, index, pathsToAdd.length)
-      }
+        ...getLoopGeometry(path.start, path.end, index, pathsToAdd.length),
+      },
     });
   });
 
@@ -1779,9 +1792,9 @@ export function updateCytoscapeEdgesCode(
               source: `${source}`,
               target: `${target}`,
               weight: formatWeight(path.weight),
-              color: "#b42318",
-              ...getLoopGeometry(path.start, path.end, index, originalPaths.length)
-            }
+              color: '#b42318',
+              ...getLoopGeometry(path.start, path.end, index, originalPaths.length),
+            },
           });
         });
       }
@@ -1793,24 +1806,21 @@ export function updateCytoscapeEdgesCode(
   // =========================
   if (colorMap instanceof Map) {
     for (const [key, color] of colorMap.entries()) {
-      if (!key.includes("-") || key.startsWith("P")) continue;
+      if (!key.includes('-') || key.startsWith('P')) continue;
 
-      const [x, y] = key.split("-").map(Number);
+      const [x, y] = key.split('-').map(Number);
 
       const u = x + 1;
       const v = y + 1;
 
-      const finalKey = `${u-1}-${v-1}`;
+      const finalKey = `${u - 1}-${v - 1}`;
 
       if (edgeExists.has(finalKey)) continue;
 
       // try to get weight from graph
-      let weight = "";
+      let weight = '';
 
-      if (
-        graph.p_list[x]?.[y] &&
-        !graph.p_list[x][y].isEmpty()
-      ) {
+      if (graph.p_list[x]?.[y] && !graph.p_list[x][y].isEmpty()) {
         weight = graph.p_list[x][y].front().weight;
       }
 
@@ -1820,8 +1830,8 @@ export function updateCytoscapeEdgesCode(
           source: `${u}`,
           target: `${v}`,
           weight: formatWeight(weight),
-          color: color || "#999"
-        }
+          color: color || '#999',
+        },
       });
 
       edgeExists.add(finalKey);
@@ -1829,35 +1839,37 @@ export function updateCytoscapeEdgesCode(
   }
 }
 
-
-
 window.showName = showName;
 window.getdistance = getdistance;
 window.getpath = getpath;
 window.askForVertices = askForVertices;
 window.doupdate = doupdate;
 window.openUpdateDialog = openUpdateDialog;
-const updateDialog = document.getElementById("update-dialog");
-const updateForm = document.getElementById("update-form");
-document.getElementById("update-all-edges").addEventListener("click", () => selectUpdateMode("vektor"));
-document.getElementById("update-some-edges").addEventListener("click", () => selectUpdateMode("hrana"));
-document.getElementById("update-dialog-back").addEventListener("click", () => {
+const updateDialog = document.getElementById('update-dialog');
+const updateForm = document.getElementById('update-form');
+document
+  .getElementById('update-all-edges')
+  .addEventListener('click', () => selectUpdateMode('vektor'));
+document
+  .getElementById('update-some-edges')
+  .addEventListener('click', () => selectUpdateMode('hrana'));
+document.getElementById('update-dialog-back').addEventListener('click', () => {
   pendingUpdateMode = null;
   currentMode = null;
-  document.getElementById("update-mode-fields").hidden = false;
-  document.getElementById("update-entry-fields").hidden = true;
-  document.getElementById("update-dialog-actions").hidden = true;
-  document.getElementById("update-dialog-title").textContent = "Aktualizácia vrcholu";
+  document.getElementById('update-mode-fields').hidden = false;
+  document.getElementById('update-entry-fields').hidden = true;
+  document.getElementById('update-dialog-actions').hidden = true;
+  document.getElementById('update-dialog-title').textContent = 'Aktualizácia vrcholu';
 });
-updateForm.addEventListener("submit", event => {
+updateForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const vertexInput = document.getElementById("update-vertex");
-  const errorMessage = document.getElementById("update-error");
+  const vertexInput = document.getElementById('update-vertex');
+  const errorMessage = document.getElementById('update-error');
   const vertex = Number(vertexInput.value);
 
-  vertexInput.removeAttribute("aria-invalid");
+  vertexInput.removeAttribute('aria-invalid');
   if (!Number.isInteger(vertex) || vertex < 1 || vertex > graph.V) {
-    vertexInput.setAttribute("aria-invalid", "true");
+    vertexInput.setAttribute('aria-invalid', 'true');
     errorMessage.textContent = `Zadajte celé číslo vrcholu od 1 do ${graph.V}.`;
     errorMessage.hidden = false;
     vertexInput.focus();
@@ -1865,43 +1877,47 @@ updateForm.addEventListener("submit", event => {
   }
 
   const firstValue = document.getElementById(
-    pendingUpdateMode === "vektor" ? "update-outgoing" : "update-targets"
+    pendingUpdateMode === 'vektor' ? 'update-outgoing' : 'update-targets'
   ).value;
   const secondValue = document.getElementById(
-    pendingUpdateMode === "vektor" ? "update-incoming" : "update-sources"
+    pendingUpdateMode === 'vektor' ? 'update-incoming' : 'update-sources'
   ).value;
 
   if (doupdate(vertexInput.value, firstValue, secondValue)) {
     updateDialog.close();
   }
 });
-updateForm.addEventListener("input", () => {
-  document.getElementById("update-error").hidden = true;
-  document.getElementById("update-vertex").removeAttribute("aria-invalid");
+updateForm.addEventListener('input', () => {
+  document.getElementById('update-error').hidden = true;
+  document.getElementById('update-vertex').removeAttribute('aria-invalid');
 });
-document.getElementById("update-dialog-close").addEventListener("click", () => updateDialog.close());
-document.getElementById("update-dialog-cancel").addEventListener("click", () => updateDialog.close());
-updateDialog.addEventListener("close", () => {
+document
+  .getElementById('update-dialog-close')
+  .addEventListener('click', () => updateDialog.close());
+document
+  .getElementById('update-dialog-cancel')
+  .addEventListener('click', () => updateDialog.close());
+updateDialog.addEventListener('close', () => {
   pendingUpdateMode = null;
   currentMode = null;
 });
-const vertexDialog = document.getElementById("vertex-dialog");
-const vertexForm = document.getElementById("vertex-form");
-vertexForm.addEventListener("submit", event => {
+const vertexDialog = document.getElementById('vertex-dialog');
+const vertexForm = document.getElementById('vertex-form');
+vertexForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const startInput = document.getElementById("vertex-start");
-  const endInput = document.getElementById("vertex-end");
-  const errorMessage = document.getElementById("vertex-error");
+  const startInput = document.getElementById('vertex-start');
+  const endInput = document.getElementById('vertex-end');
+  const errorMessage = document.getElementById('vertex-error');
   const inputs = [startInput, endInput];
-  const invalidInputs = inputs.filter(input => {
+  const invalidInputs = inputs.filter((input) => {
     const value = Number(input.value);
     return !input.value || !Number.isInteger(value) || value < 1 || value > graph.V;
   });
 
-  inputs.forEach(input => input.removeAttribute("aria-invalid"));
+  inputs.forEach((input) => input.removeAttribute('aria-invalid'));
   if (invalidInputs.length > 0) {
-    invalidInputs.forEach(input => input.setAttribute("aria-invalid", "true"));
-    errorMessage.textContent = `Zadajte celé číslo od 1 do ${graph.V} pre ${invalidInputs.length === 2 ? "oba vrcholy" : invalidInputs[0] === startInput ? "začiatočný vrchol" : "koncový vrchol"}.`;
+    invalidInputs.forEach((input) => input.setAttribute('aria-invalid', 'true'));
+    errorMessage.textContent = `Zadajte celé číslo od 1 do ${graph.V} pre ${invalidInputs.length === 2 ? 'oba vrcholy' : invalidInputs[0] === startInput ? 'začiatočný vrchol' : 'koncový vrchol'}.`;
     errorMessage.hidden = false;
     invalidInputs[0].focus();
     return;
@@ -1914,62 +1930,63 @@ vertexForm.addEventListener("submit", event => {
   pendingVertexCallback = null;
   if (callback) callback(start, end);
 });
-vertexForm.addEventListener("input", () => {
-  document.getElementById("vertex-error").hidden = true;
-  document.querySelectorAll("#vertex-start, #vertex-end").forEach(input => input.removeAttribute("aria-invalid"));
+vertexForm.addEventListener('input', () => {
+  document.getElementById('vertex-error').hidden = true;
+  document
+    .querySelectorAll('#vertex-start, #vertex-end')
+    .forEach((input) => input.removeAttribute('aria-invalid'));
 });
-document.getElementById("vertex-dialog-close").addEventListener("click", () => vertexDialog.close());
-document.getElementById("vertex-dialog-cancel").addEventListener("click", () => vertexDialog.close());
-vertexDialog.addEventListener("close", () => {
+document
+  .getElementById('vertex-dialog-close')
+  .addEventListener('click', () => vertexDialog.close());
+document
+  .getElementById('vertex-dialog-cancel')
+  .addEventListener('click', () => vertexDialog.close());
+vertexDialog.addEventListener('close', () => {
   pendingVertexCallback = null;
 });
-vertexDialog.addEventListener("click", event => {
+vertexDialog.addEventListener('click', (event) => {
   if (event.target === vertexDialog) vertexDialog.close();
 });
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   if (cy) {
     cy.resize();
     cy.fit();
   }
 });
 let currentMode = null;
-let cyPerspective = "graph";
+let cyPerspective = 'graph';
 
 function setPerspectiveControlsVisible(isVisible) {
-  const perspectiveControls = document.getElementById("cy-perspective-controls");
+  const perspectiveControls = document.getElementById('cy-perspective-controls');
   if (!perspectiveControls) return;
-  perspectiveControls.style.display = isVisible ? "inline-flex" : "none";
+  perspectiveControls.style.display = isVisible ? 'inline-flex' : 'none';
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-
-  document.querySelectorAll('input[name="cyPerspective"]').forEach(radio => {
-    radio.addEventListener("change", function () {
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[name="cyPerspective"]').forEach((radio) => {
+    radio.addEventListener('change', function () {
       cyPerspective = this.value;
       requestAnimationFrame(() => updateCytoscapeEdges(graph));
     });
   });
 
   setPerspectiveControlsVisible(true);
-
 });
-window.addEventListener("DOMContentLoaded", () => {
-
-  document.querySelectorAll('input[name="mode1"]').forEach(radio => {
-    radio.addEventListener("change", function () {
-      if (graph == null)
-      {
-        alert("zadajte najprv počet vrcholov");
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[name="mode1"]').forEach((radio) => {
+    radio.addEventListener('change', function () {
+      if (graph == null) {
+        alert('zadajte najprv počet vrcholov');
         return;
       }
       queueMode = this.value;
       console.log(queueMode);
       console.log('queueMode');
-      if (queueMode === "L") {
+      if (queueMode === 'L') {
         resetLocallyShortestQueues();
       } else {
         resetShortestQueues();
-
       }
     });
   });
