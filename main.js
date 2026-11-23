@@ -1948,11 +1948,17 @@ vertexDialog.addEventListener('close', () => {
 vertexDialog.addEventListener('click', (event) => {
   if (event.target === vertexDialog) vertexDialog.close();
 });
+let graphResizeTimer = null;
+
 window.addEventListener('resize', () => {
-  if (cy) {
-    cy.resize();
-    cy.fit();
-  }
+  if (!cy) return;
+
+  cy.resize();
+  if (graphResizeTimer) clearTimeout(graphResizeTimer);
+  graphResizeTimer = setTimeout(() => {
+    graphResizeTimer = null;
+    if (cy) cy.fit(undefined, 30);
+  }, 180);
 });
 let currentMode = null;
 let cyPerspective = 'graph';

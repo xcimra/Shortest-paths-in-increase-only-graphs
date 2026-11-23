@@ -14,14 +14,17 @@ body {
   align-items: flex-start;
   gap: 20px;
 }
+.graph-page {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .color-square-panel {
-  order: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-width: 220px;
+  min-width: 0;
+  width: 100%;
   padding: 16px 12px;
-  margin-left: auto;
 }
 .square-item {
   display: flex;
@@ -58,7 +61,17 @@ body {
   color: #1b2430;
 }
 #cy-perspective-controls {
-  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  margin-left: 0;
+}
+#cy-perspective-controls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .workspace {
     display: flex;
@@ -136,7 +149,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 100%;
+  width: min(100%, 300px);
   padding: 12px;
   border: 2px solid;
   border-radius: 8px;
@@ -431,13 +444,65 @@ body {
   font-size: 0.9rem;
   text-align: center;
 }
+.graph-layout {
+  display: grid;
+  grid-template-columns: minmax(86px, 110px) minmax(0, 600px) minmax(140px, 190px);
+  align-items: start;
+  justify-content: center;
+  gap: 14px;
+  width: min(100%, 928px);
+  margin-inline: auto;
+}
+.graph-center {
+  min-width: 0;
+}
+.graph-container {
+  width: 100%;
+  height: clamp(240px, 40vh, 560px);
+  margin: 0;
+  border: 10px solid #ccc;
+  box-sizing: border-box;
+}
 .graph-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 6px;
-  width: 60vh;
-  margin-left: 10vh;
+  width: 100%;
+  margin: 12px 0 0;
+}
+
+@media (max-width: 720px) {
+  .graph-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  #cy-perspective-controls {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+  }
+
+  .color-square-panel {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-end;
+    text-align: right;
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+
+  .graph-center {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .graph-container {
+    height: clamp(220px, 45vh, 420px);
+  }
 }
 @media (max-width: 480px) {
   .vertex-form {

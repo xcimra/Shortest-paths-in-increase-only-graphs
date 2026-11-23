@@ -5,6 +5,7 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -28,19 +29,8 @@
   pointer-events: none; /* Aby myš ignorovala box a neblikala pri pohybe */
 ">
 </div>
-    <div style="display: flex;">
+    <div>
         <div><h1></h1> </div>
-
-        <span id="cy-perspective-controls">
-        <label>
-        <input type="radio" name="cyPerspective" value="graph" checked>
-        Cesty
-        </label>
-        <label>
-        <input type="radio" name="cyPerspective" value="edge">
-        Hrany
-        </label>
-        </span>
     </div>
     <div>
         <div class="editor">
@@ -54,7 +44,7 @@
 </div>
 
 
-    <div>
+    <div class="graph-page">
         <div id="playback-workspace" class="workspace is-hidden">
             <div class="workspace-item">
                 <h2 class="workspace-label">Cieľ</h2>
@@ -62,8 +52,20 @@
             </div>
         </div>
 
-        <div id="cy" style="width: 60vh; height: 40vh; margin-left: 10vh;margin-right: 20vh; border: 1vh solid #ccc;"></div>
-        <div class="graph-actions">
+        <div class="graph-layout">
+            <span id="cy-perspective-controls" aria-label="Zobrazenie grafu">
+                <label>
+                    <input type="radio" name="cyPerspective" value="graph" checked>
+                    Cesty
+                </label>
+                <label>
+                    <input type="radio" name="cyPerspective" value="edge">
+                    Hrany
+                </label>
+            </span>
+            <div class="graph-center">
+                <div id="cy" class="graph-container"></div>
+                <div class="graph-actions">
         <button onclick="showName()">Nový graf</button>
 
         <button onclick="askForVertices(getdistance)">Vzdialenosť</button>
@@ -71,6 +73,9 @@
         <button onclick="askForVertices(getpath)">Cesta</button>
         <button type="button" onclick="openUpdateDialog()">Aktualizácia vrcholu</button>
         <p class="graph-edge-hint">Alebo zadajte hranu kliknutím na dva vrcholy v grafe (najprv zdrojový, potom cieľový).</p>
+        </div>
+            </div>
+            <div id="color-square-panel" class="color-square-panel" aria-label="Legenda"></div>
         </div>
         <dialog id="vertex-dialog" class="vertex-dialog" aria-labelledby="vertex-dialog-title">
             <form id="vertex-form" class="vertex-form" novalidate>
@@ -138,7 +143,6 @@
         <label><input type="radio" name="mode1" value="L"> Najkratšie cesty</label>
         <label><input type="radio" name="mode1" value="NonL"> Lokálne najkratšie cesty</label>
     </div>
-    <div id="color-square-panel" class="color-square-panel" aria-label="Farby"></div>
     <aside class="side-panel update-side-panel"  aria-label="Aktualizácie">
         <h2 class="workspace-label">funkcie</h2>
         <div id="update-app"></div>
